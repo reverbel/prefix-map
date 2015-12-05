@@ -8,19 +8,7 @@ class TernaryTreeMap<KeyElement, Item>()
         satisfies PrefixMap<KeyElement, Item> 
                   & MutableMap<[KeyElement+], Item> 
         given KeyElement satisfies Comparable<KeyElement> {
-        
-    shared actual Integer hash {
-        variable value hash = 1;
-        return hash;
-    }
-    shared actual Boolean equals(Object that) {
-        if (is TernaryTreeMap<KeyElement, Item> that) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+    
     shared actual MutableMap<Key, Item> clone() => nothing;
     
     
@@ -365,7 +353,12 @@ class TernaryTreeMap<KeyElement, Item>()
         root = newRoot;
         return if (keyRemoved) then item else null; 
     }
-
+    
+    shared actual Boolean equals(Object that) 
+            => (super of Map<Key,Item>).equals(that);
+    
+    shared actual Integer hash => (super of Map<Key,Item>).hash;
+    
     void printNode(Node n) {
         print("``n.element``, ``n.item else "null item"``, ``n.leftChild else "no left child"``, ``n.middleChild else "no middle child"``, ``n.rightChild else "no right child"``, ``if (n.terminal) then "terminal" else "nonterminal"``");
     }
