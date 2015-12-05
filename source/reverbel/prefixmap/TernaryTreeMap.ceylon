@@ -256,35 +256,6 @@ class TernaryTreeMap<KeyElement, Item>()
     Boolean danglingLeaf(Node n)
             => !n.terminal && leaf(n);
     
-    // Auxiliary method for `removeNodes`. This is not a general method that
-    // adds any subtree to any existing tree. It ASSUMES that `target` and 
-    // `subtree` are left and right children of the same node.  
-    void addSubtree(Node target, Node subtree) {
-        switch (subtree.element <=> target.element)
-        case (smaller) {
-            if (exists l = target.leftChild) {
-                addSubtree(l, subtree);
-            }
-            else {
-                target.leftChild = subtree;
-            }
-        }
-        case (larger) {
-            if (exists r = target.rightChild) {
-                addSubtree(r, subtree);
-            }
-            else {
-                target.rightChild = subtree;
-            }
-        }
-        case (equal) {
-            // Never gets here, because `target` and `subtree`
-            // are non-middle children of the same node. 
-            "This case should never happen" 
-            assert(false);
-        }
-    }
-
     [Node?, Item?, Boolean] removeNodes(Node? curNode, Key key) {
         if (!exists curNode) {
             return [curNode, null, false];
@@ -327,11 +298,15 @@ class TernaryTreeMap<KeyElement, Item>()
                             // The node to be pruned has two children subtrees:
                             // join these subtrees together, creating a subtree
                             // that will take the place of the vanishing node.
-                            addSubtree { 
-                                target = l;  // arbitrary choice, the other way
-                                subtree = r; //          around would also work 
-                            };
-                            retNode = l;     // the node chosen as target above
+                            // We have arbitrarily chosen to put the r subtree 
+                            // under the l subtree. (The other way around would
+                            // also work.)
+                            Node descendRightmostBranch(Node n)
+                                    => if (exists rc = n.rightChild)
+                                       then descendRightmostBranch(rc)
+                                       else n;
+                            descendRightmostBranch(l).rightChild = r;
+                            retNode = l;
                         }
                         else if (!(curNode.leftChild exists)) {
                             // right child will replace `curNode`

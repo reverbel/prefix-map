@@ -86,5 +86,10 @@ shared void run() {
     print(n);
     print(map);
     map.printNodes();
+
+    n = map.remove(toSequence("day"));
+    print(n);
+    print(map);
+    map.printNodes();
     
 }
