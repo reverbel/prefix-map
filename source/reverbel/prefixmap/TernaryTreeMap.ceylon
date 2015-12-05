@@ -34,8 +34,39 @@ class TernaryTreeMap<KeyElement, Item>()
     }
     variable Node? root = null;
     
-    Node? lookup(Key key) {
-        variable Node? node = root;
+    Node? lookup(Key key, Node? startingNode = root)
+        => let (node = search(key, startingNode))
+           if (exists node, node.terminal) then node else null; 
+
+    
+    Node? search(Key key, Node? curNode) {
+        if (!exists curNode) {
+            return null; 
+        }
+        else { 
+            switch (key.first <=> curNode.element)
+            case (smaller) { 
+                return search(key, curNode.leftChild); 
+            } 
+            case (larger) {
+                return search(key, curNode.rightChild); 
+            }
+            case (equal) {
+                if (nonempty rest = key.rest) {
+                    return search(rest, curNode.middleChild); 
+                }
+                else {
+                    // the last element of `key` matched the one in `node`
+                    return curNode;
+                }
+            }
+        }
+    }
+   
+   /*
+    //Iterative version of lookup
+    Node? lookup(Key key, Node? startingNode = root) {
+        variable Node? node = startingNode;
         variable Key k = key;
         print("within lookup");
         print("root:");
@@ -63,31 +94,7 @@ class TernaryTreeMap<KeyElement, Item>()
         }
         return null;
     }
-    
-    Node? rLookup(Key key, Node? node) {
-        if (!exists node) {
-            return null; 
-        }
-        else { 
-            switch (key.first <=> node.element)
-            case (smaller) { 
-                return rLookup(key, node.leftChild); 
-            } 
-            case (larger) {
-                return rLookup(key, node.rightChild); 
-            }
-            case (equal) {
-                if (nonempty rest = key.rest) {
-                    return rLookup(rest, node.middleChild); 
-                }
-                else {
-                    // the last element of `key` matched the one in `node`
-                    return node;
-                    // return if (node.terminal) then node else null;
-                }
-            }
-        }
-    }
+    */
    
     shared actual Item? get(Object key)
             => if (is Key key) 
@@ -107,11 +114,11 @@ class TernaryTreeMap<KeyElement, Item>()
             // left subtree:
             enumerateEntries(node.leftChild, keyPrefix, queue);
             
-            // middle subtree:
+            // middle <:
             keyPrefix.add(node.element);
             if (node.terminal) {
-                assert (is Key k = [ for (e in keyPrefix) e ]);
-                assert (is Item i = node.item);
+                assert (nonempty k = [ for (e in keyPrefix) e ]);
+                assert (exists i = node.item);
                 queue.add(k->i);
             }
             enumerateEntries(node.middleChild, keyPrefix, queue);
@@ -129,7 +136,7 @@ class TernaryTreeMap<KeyElement, Item>()
     }
  
     Node? subtree(Key prefix) 
-            => rLookup(prefix, root); 
+            => search(prefix, root); 
 
     shared actual Boolean hasKeyWithPrefix(Object prefix)
             => if (is Key prefix) then (subtree(prefix) exists) else false;
@@ -185,16 +192,16 @@ class TernaryTreeMap<KeyElement, Item>()
     
     shared actual void clear() {}
     
-    [Node, Item?] insertNodes(Node? currentNode, Key key, Item item) {
+    [Node, Item?] insert(Node? curNode, Key key, Item item) {
         value first = key.first;
-        if (!exists currentNode) {
+        if (!exists curNode) {
             print("inserting \'``first``\'" );
             // create new node
             value newNode = Node(first, null, null, null, null, false);
             if (nonempty rest = key.rest) {
                 // insert Nodes with the rest of the key 
                 // into the subtree rooted at newNode 
-                newNode.middleChild = insertNodes(newNode.middleChild, rest, item)[0];
+                newNode.middleChild = insert(newNode.middleChild, rest, item)[0];
             }
             else {
                 // newNode received the last element of the key
@@ -205,39 +212,39 @@ class TernaryTreeMap<KeyElement, Item>()
             return [newNode, null];
         }
         else {
-            value e = currentNode.element;
+            value e = curNode.element;
             Item? oldItem;
             switch (first <=> e)
             case (smaller) {
-                value [n, i] = insertNodes(currentNode.leftChild, key, item);
-                currentNode.leftChild = n;
+                value [n, i] = insert(curNode.leftChild, key, item);
+                curNode.leftChild = n;
                 oldItem = i;
             }
             case (larger) {
-                value [n, i] = insertNodes(currentNode.rightChild, key, item);
-                currentNode.rightChild = n;
+                value [n, i] = insert(curNode.rightChild, key, item);
+                curNode.rightChild = n;
                 oldItem = i;
             }
             case (equal) {
                 if (nonempty rest = key.rest) {
-                    value [n, i] = insertNodes(currentNode.middleChild, rest, item);
-                    currentNode.middleChild = n;
+                    value [n, i] = insert(curNode.middleChild, rest, item);
+                    curNode.middleChild = n;
                     oldItem = i;
                 }
                 else {
-                    oldItem = if (currentNode.terminal) 
-                              then currentNode.item 
+                    oldItem = if (curNode.terminal) 
+                              then curNode.item 
                               else null;
-                    currentNode.item = item;
-                    currentNode.terminal = true; 
+                    curNode.item = item;
+                    curNode.terminal = true; 
                 }
             }
-            return [currentNode, oldItem];
+            return [curNode, oldItem];
         }
     }
     
     shared actual Item? put(Key key, Item item) {
-        value [newRoot, oldItem] = insertNodes(root, key, item);
+        value [newRoot, oldItem] = insert(root, key, item);
         root = newRoot;
         return oldItem;
     }
@@ -248,6 +255,35 @@ class TernaryTreeMap<KeyElement, Item>()
     
     Boolean danglingLeaf(Node n)
             => !n.terminal && leaf(n);
+    
+    // Auxiliary method for `removeNodes`. This is not a general method that
+    // adds any subtree to any existing tree. It ASSUMES that `target` and 
+    // `subtree` are left and right children of the same node.  
+    void addSubtree(Node target, Node subtree) {
+        switch (subtree.element <=> target.element)
+        case (smaller) {
+            if (exists l = target.leftChild) {
+                addSubtree(l, subtree);
+            }
+            else {
+                target.leftChild = subtree;
+            }
+        }
+        case (larger) {
+            if (exists r = target.rightChild) {
+                addSubtree(r, subtree);
+            }
+            else {
+                target.rightChild = subtree;
+            }
+        }
+        case (equal) {
+            // Never gets here, because `target` and `subtree`
+            // are non-middle children of the same node. 
+            "This case should never happen" 
+            assert(false);
+        }
+    }
 
     [Node?, Item?, Boolean] removeNodes(Node? curNode, Key key) {
         if (!exists curNode) {
@@ -278,10 +314,39 @@ class TernaryTreeMap<KeyElement, Item>()
                     value [n, i, keyRemoved] = 
                             removeNodes(curNode.middleChild, rest);
                     curNode.middleChild = n;
-                    // TODO: prune non-terminal nodes with no middle child 
-                    return [if (danglingLeaf(curNode)) then null else curNode,
-                            i, 
-                            keyRemoved];
+                    
+                    Node? retNode; // The node to be returned by this method
+                    // If `curNode` remains in the tree, `retNode` will be 
+                    // `curNode`. Otherwise, `retNode` will be either null
+                    // or a node that takes the place of `curNode`.
+
+                    if (!curNode.terminal && !(n exists)) {
+                        // prune non-terminal nodes with no middle child 
+                        if (exists l = curNode.leftChild, 
+                            exists r = curNode.rightChild) {
+                            // The node to be pruned has two children subtrees:
+                            // join these subtrees together, creating a subtree
+                            // that will take the place of the vanishing node.
+                            addSubtree { 
+                                target = l;  // arbitrary choice, the other way
+                                subtree = r; //          around would also work 
+                            };
+                            retNode = l;     // the node chosen as target above
+                        }
+                        else if (!(curNode.leftChild exists)) {
+                            // right child will replace `curNode`
+                            retNode = curNode.rightChild; // possibly null
+                        }
+                        else { // (!(curNode.rightChild exists))
+                            // left child will replace `curNode`
+                            retNode = curNode.leftChild;
+                        }
+                    }
+                    else {
+                        // `curNode` remains in the tree
+                        retNode = curNode;
+                    }
+                    return [retNode, i, keyRemoved];
                 }
                 else {
                     // current node has the last element of the key

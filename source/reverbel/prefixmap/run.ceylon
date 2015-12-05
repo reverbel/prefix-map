@@ -75,9 +75,16 @@ shared void run() {
     n = map.remove(toSequence("cast"));
     print(n);
     print(map);
+
     //n = map.remove(toSequence("caste"));
     n = map.remove(toSequence("cats"));
     print(n);
     print(map);
     map.printNodes();
+    
+    n = map.remove(toSequence("donut"));
+    print(n);
+    print(map);
+    map.printNodes();
+    
 }
