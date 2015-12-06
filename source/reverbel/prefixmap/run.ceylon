@@ -70,8 +70,12 @@ shared void run() {
         n = map.put(toSequence(str), str.size);
         print(n);
         print(map);
-        map.printNodes();  
+        map.printNodes();
     }
+    value originalMap = map.clone();
+    assert(map == originalMap);
+    assert(map.hash == originalMap.hash);
+    
     n = map.remove(toSequence("cast"));
     print(n);
     print(map);
@@ -91,5 +95,9 @@ shared void run() {
     print(n);
     print(map);
     map.printNodes();
+    
+    print(if (map != originalMap) then "map changed" else "");
+    print(originalMap);
+    originalMap.printNodes();
     
 }

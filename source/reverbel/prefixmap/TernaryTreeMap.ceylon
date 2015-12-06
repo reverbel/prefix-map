@@ -4,28 +4,131 @@ import ceylon.collection {
     ArrayList
 }
 
-class TernaryTreeMap<KeyElement, Item>() 
+class TernaryTreeMap<KeyElement, Item> 
         satisfies PrefixMap<KeyElement, Item> 
                   & MutableMap<[KeyElement+], Item> 
         given KeyElement satisfies Comparable<KeyElement> {
     
-    shared actual MutableMap<Key, Item> clone() => nothing;
-    
-    
     class Node(shared KeyElement element,
-               shared variable Item? item, 
-               shared variable Node? leftChild,
-               shared variable Node? middleChild,
-               shared variable Node? rightChild,
-               shared variable Boolean terminal) {
+        shared variable Item? item, 
+        shared variable Node? leftChild,
+        shared variable Node? middleChild,
+        shared variable Node? rightChild,
+        shared variable Boolean terminal) {
         
+        shared Node deepCopy() {
+            value copy = Node {
+                element = this.element;
+                item = this.item;
+                leftChild = null;
+                middleChild = null;
+                rightChild = null;
+                terminal = this.terminal;
+            };
+            if (exists l = leftChild) {
+                copy.leftChild = l.deepCopy();
+            }
+            if (exists m = middleChild) {
+                copy.middleChild = m.deepCopy();
+            }
+            if (exists r = rightChild) {
+                copy.rightChild = r.deepCopy();
+            }
+            return copy;
+        }
     }
-    variable Node? root = null;
+    
+    "The root node of the tree."
+    variable Node? root;
+    
+    "The initial entries in the map."
+    {<Key->Item>*} entries;
+    
+    "Alternatively, a node to clone."
+    Node? nodeToClone;
+        
+    "Create a new `TernaryTreeMap` with the given [[entries]]."
+    shared new (
+        "The initial entries in the map."
+        {<Key->Item>*} entries = {}) {
+        this.entries = entries;
+        nodeToClone = null;
+    }
+    
+    "Create a new `TernaryTreeMap` with the same entries as the
+     given [[ternaryTreeMap]]."
+    shared new copy(TernaryTreeMap<KeyElement,Item> ternaryTreeMap) {
+        entries = {};
+        nodeToClone = ternaryTreeMap.root;
+    }
+    
+    root = if (exists nodeToClone) 
+           then nodeToClone.deepCopy() else null;
+    
+    [Node, Item?] insert(Node? curNode, Key key, Item item) {
+        value first = key.first;
+        if (!exists curNode) {
+            print("inserting \'``first``\'" );
+            // create new node
+            value newNode = Node(first, null, null, null, null, false);
+            if (nonempty rest = key.rest) {
+                // insert Nodes with the rest of the key 
+                // into the subtree rooted at newNode 
+                newNode.middleChild = insert(newNode.middleChild, rest, item)[0];
+            }
+            else {
+                // newNode received the last element of the key
+                // store item in it and mark it as terminal
+                newNode.item = item;
+                newNode.terminal = true;
+            }
+            return [newNode, null];
+        }
+        else {
+            value e = curNode.element;
+            Item? oldItem;
+            switch (first <=> e)
+            case (smaller) {
+                value [n, i] = insert(curNode.leftChild, key, item);
+                curNode.leftChild = n;
+                oldItem = i;
+            }
+            case (larger) {
+                value [n, i] = insert(curNode.rightChild, key, item);
+                curNode.rightChild = n;
+                oldItem = i;
+            }
+            case (equal) {
+                if (nonempty rest = key.rest) {
+                    value [n, i] = insert(curNode.middleChild, rest, item);
+                    curNode.middleChild = n;
+                    oldItem = i;
+                }
+                else {
+                    oldItem = if (curNode.terminal) 
+                    then curNode.item 
+                    else null;
+                    curNode.item = item;
+                    curNode.terminal = true; 
+                }
+            }
+            return [curNode, oldItem];
+        }
+    }
+    
+    shared actual Item? put(Key key, Item item) {
+        value [newRoot, oldItem] = insert(root, key, item);
+        root = newRoot;
+        return oldItem;
+    }
+    
+    for (key->item in entries) {
+        put(key, item);
+    }
     
     Node? lookup(Key key, Node? startingNode = root)
-        => let (node = search(key, startingNode))
-           if (exists node, node.terminal) then node else null; 
-
+            => let (node = search(key, startingNode))
+    if (exists node, node.terminal) then node else null; 
     
     Node? search(Key key, Node? curNode) {
         if (!exists curNode) {
@@ -50,6 +153,7 @@ class TernaryTreeMap<KeyElement, Item>()
             }
         }
     }
+    
    
    /*
     //Iterative version of lookup
@@ -178,65 +282,6 @@ class TernaryTreeMap<KeyElement, Item>()
         }
     }
     
-    shared actual void clear() {}
-    
-    [Node, Item?] insert(Node? curNode, Key key, Item item) {
-        value first = key.first;
-        if (!exists curNode) {
-            print("inserting \'``first``\'" );
-            // create new node
-            value newNode = Node(first, null, null, null, null, false);
-            if (nonempty rest = key.rest) {
-                // insert Nodes with the rest of the key 
-                // into the subtree rooted at newNode 
-                newNode.middleChild = insert(newNode.middleChild, rest, item)[0];
-            }
-            else {
-                // newNode received the last element of the key
-                // store item in it and mark it as terminal
-                newNode.item = item;
-                newNode.terminal = true;
-            }
-            return [newNode, null];
-        }
-        else {
-            value e = curNode.element;
-            Item? oldItem;
-            switch (first <=> e)
-            case (smaller) {
-                value [n, i] = insert(curNode.leftChild, key, item);
-                curNode.leftChild = n;
-                oldItem = i;
-            }
-            case (larger) {
-                value [n, i] = insert(curNode.rightChild, key, item);
-                curNode.rightChild = n;
-                oldItem = i;
-            }
-            case (equal) {
-                if (nonempty rest = key.rest) {
-                    value [n, i] = insert(curNode.middleChild, rest, item);
-                    curNode.middleChild = n;
-                    oldItem = i;
-                }
-                else {
-                    oldItem = if (curNode.terminal) 
-                              then curNode.item 
-                              else null;
-                    curNode.item = item;
-                    curNode.terminal = true; 
-                }
-            }
-            return [curNode, oldItem];
-        }
-    }
-    
-    shared actual Item? put(Key key, Item item) {
-        value [newRoot, oldItem] = insert(root, key, item);
-        root = newRoot;
-        return oldItem;
-    }
-
     Boolean leaf(Node n)
             => !(n.leftChild exists) 
                 && !(n.middleChild exists) && !(n.rightChild exists);
@@ -354,10 +399,14 @@ class TernaryTreeMap<KeyElement, Item>()
         return if (keyRemoved) then item else null; 
     }
     
+    shared actual void clear() => root = null;
+    
     shared actual Boolean equals(Object that) 
             => (super of Map<Key,Item>).equals(that);
     
     shared actual Integer hash => (super of Map<Key,Item>).hash;
+    
+    shared actual TernaryTreeMap<KeyElement, Item> clone() => copy(this);
     
     void printNode(Node n) {
         print("``n.element``, ``n.item else "null item"``, ``n.leftChild else "no left child"``, ``n.middleChild else "no middle child"``, ``n.rightChild else "no right child"``, ``if (n.terminal) then "terminal" else "nonterminal"``");
