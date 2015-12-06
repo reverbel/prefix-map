@@ -58,15 +58,22 @@ class TernaryTreeMap<KeyElement, Item>
     "The initial entries in the map."
     {<Key->Item>*} entries;
     
-    "Alternatively, a node to clone."
+    "Alternatively, the root node of a tree to clone."
     Node? nodeToClone;
+        
+    "A comparator function used to sort the entries."
+    Comparison compare(KeyElement x, KeyElement y);
         
     "Create a new `TernaryTreeMap` with the given [[entries]]."
     shared new (
         "The initial entries in the map."
-        {<Key->Item>*} entries = {}) {
+        {<Key->Item>*} entries = {},
+        "A function used to compare the elements of the entries."
+        Comparison(KeyElement, KeyElement) compare = 
+                (KeyElement x, KeyElement y) => x.compare(y)) {
         this.entries = entries;
         nodeToClone = null;
+        this.compare = compare;
     }
     
     "Create a new `TernaryTreeMap` with the same entries as the
@@ -74,6 +81,7 @@ class TernaryTreeMap<KeyElement, Item>
     shared new copy(TernaryTreeMap<KeyElement,Item> ternaryTreeMap) {
         entries = {};
         nodeToClone = ternaryTreeMap.root;
+        compare = ternaryTreeMap.compare;
     }
     
     root = if (exists nodeToClone) 
@@ -101,7 +109,7 @@ class TernaryTreeMap<KeyElement, Item>
         else {
             value e = curNode.element;
             Item? oldItem;
-            switch (first <=> e)
+            switch (compare(first, e))
             case (smaller) {
                 value [n, i] = insert(curNode.leftChild, key, item);
                 curNode.leftChild = n;
@@ -149,7 +157,7 @@ class TernaryTreeMap<KeyElement, Item>
             return null; 
         }
         else { 
-            switch (key.first <=> curNode.element)
+            switch (compare(key.first, curNode.element))
             case (smaller) { 
                 return search(key, curNode.leftChild); 
             } 
@@ -179,7 +187,7 @@ class TernaryTreeMap<KeyElement, Item>
         print(root);
         while (exists n = node) {
             print(n.element);
-            switch (k.first <=> n.element)
+            switch (compare(k.first, n.element))
             case (smaller) {
                 node = n.leftChild;
             }
@@ -310,7 +318,7 @@ class TernaryTreeMap<KeyElement, Item>
         else {
             value e = curNode.element;
             value first = key.first;
-            switch (first <=> e)
+            switch (compare(first, e))
             case (smaller) {
                 value [n, i, keyRemoved] = 
                         removeNodes(curNode.leftChild, key);

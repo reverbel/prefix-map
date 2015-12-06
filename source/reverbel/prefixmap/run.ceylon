@@ -101,4 +101,11 @@ shared void run() {
     originalMap.printNodes();
     print(originalMap.size);
     
+    value m = TernaryTreeMap {
+        entries = { for (str in strings) toSequence(str) -> str.size };
+        Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
+    };
+    print(map);
+    n = m.get(toSequence("dOnUt"));
+    print(n);
 }
