@@ -87,6 +87,9 @@ class TernaryTreeMap<KeyElement, Item>
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
     
+    // TODO: 
+    // Split this method in two (one that returns Node, another that
+    // returns Item?).
     [Node, Item?] insert(Node? curNode, Key key, Item item) {
         value first = key.first;
         if (!exists curNode) {
@@ -228,7 +231,7 @@ class TernaryTreeMap<KeyElement, Item>
             // left subtree:
             enumerateEntries(node.leftChild, keyPrefix, queue);
             
-            // middle <:
+            // middle subtree:
             keyPrefix.add(node.element);
             if (node.terminal) {
                 assert (nonempty k = [ for (e in keyPrefix) e ]);
@@ -311,6 +314,10 @@ class TernaryTreeMap<KeyElement, Item>
     Boolean danglingLeaf(Node n)
             => !n.terminal && leaf(n);
     
+    // TODO: 
+    // Change this method so that it returns just Node?. Make it
+    // pass back the Item? and Boolean by assigning them to variable
+    // atributes of an object passed forward along the invocation chain. 
     [Node?, Item?, Boolean] removeNodes(Node? curNode, Key key) {
         if (!exists curNode) {
             return [curNode, null, false];
