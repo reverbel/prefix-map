@@ -99,5 +99,6 @@ shared void run() {
     print(if (map != originalMap) then "map changed" else "");
     print(originalMap);
     originalMap.printNodes();
+    print(originalMap.size);
     
 }

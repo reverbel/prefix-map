@@ -36,6 +36,20 @@ class TernaryTreeMap<KeyElement, Item>
             }
             return copy;
         }
+        
+        shared Integer size {
+            variable Integer size = if (terminal) then 1 else 0;
+            if (exists l = leftChild) {
+                size += l.size;
+            }
+            if (exists m = middleChild) {
+                size += m.size;
+            }
+            if (exists r = rightChild) {
+                size += r.size;
+            }
+            return size;
+        }
     }
     
     "The root node of the tree."
@@ -400,6 +414,8 @@ class TernaryTreeMap<KeyElement, Item>
     }
     
     shared actual void clear() => root = null;
+    
+    shared actual Integer size => root?.size else 0;
     
     shared actual Boolean equals(Object that) 
             => (super of Map<Key,Item>).equals(that);
