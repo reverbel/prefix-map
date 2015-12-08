@@ -297,8 +297,8 @@ class TernaryTreeMap<KeyElement, Item>
                 queue.add(prefix->i);
             }
             enumerateEntries(node.middleChild, 
-                    ArrayList<KeyElement> { elements = prefix; }, 
-                    queue);
+                             ArrayList<KeyElement> { elements = prefix; }, 
+                             queue);
             assert (is {<Key->Item>+} queue);
             return queue;
         }
@@ -309,7 +309,7 @@ class TernaryTreeMap<KeyElement, Item>
     
     Boolean leaf(Node n)
             => !(n.leftChild exists) 
-                && !(n.middleChild exists) && !(n.rightChild exists);
+               && !(n.middleChild exists) && !(n.rightChild exists);
     
     Boolean danglingLeaf(Node n)
             => !n.terminal && leaf(n);
