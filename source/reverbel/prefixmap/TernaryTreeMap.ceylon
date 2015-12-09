@@ -205,11 +205,7 @@ shared class TernaryTreeMap<KeyElement, Item>
     Node? lookup(Key key, Node? startingNode = root) {
         variable Node? node = startingNode;
         variable Key k = key;
-        print("within lookup");
-        print("root:");
-        print(root);
         while (exists n = node) {
-            print(n.element);
             switch (compare(k.first, n.element))
             case (smaller) {
                 node = n.left;
@@ -392,8 +388,6 @@ shared class TernaryTreeMap<KeyElement, Item>
                 }
                 else {
                     // current node has the last element of the key
-                    print(">>> ``node.element``");
-                    printNode(node);
                     // is it a terminal node?
                     if (node.terminal) {
                         // yes: 
