@@ -1,6 +1,5 @@
 "A [[Map]] whose keys are sequences of [[Comparable]] elements.
- The entries in a `PrefixMap` are mantained in lexicographic order of 
- keys. `PrefixMap` supports the following prefix queries:
+ `PrefixMap` supports the following prefix queries:
  - Does the map contain some [[Entry]] whose key has a given prefix?
  - Retrieve all the keys of the map that have a given prefix.
  - Retrieve all the entries in the map whose keys have a given prefix."
