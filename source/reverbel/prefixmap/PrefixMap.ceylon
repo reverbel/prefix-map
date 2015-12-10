@@ -14,22 +14,23 @@ shared interface PrefixMap<out KeyElement, out Item>
      sequence of `KeyElement`s. (`Key` is an alias for `[KeyElement+]`.)"
     shared interface Key => [KeyElement+];
     
-    "Returns `true` if this map has a key with the given prefix, or `false`
-     otherwise."
+    "Returns `true` if this map has a key with the given prefix, or
+     `false` otherwise."
     shared formal Boolean hasKeyWithPrefix(Object prefix);
     
-    "Returns a stream with all the keys of this map with the given prefix."
+    "Returns a stream containing all the keys of this map with the given
+     prefix."
     shared formal {Key*} keysWithPrefix(Object prefix);
     
-    "Returns a stream with all the entries in this map whose keys have
-     the given prefix."
+    "Returns a stream with all the entries in this map whose keys have the
+     given prefix."
     shared formal {<Key->Item>*} entriesWithPrefix(Object prefix);
     
-    "Returns a non-empty stream with all the keys of this map with the 
-     given prefix, or `null` if no such key appears in this map."
+    "Returns a non-empty stream containing all the keys of this map 
+     with the given prefix, or `null` if no such key appears in this map."
     shared formal {Key+}? oneOrMoreKeysWithPrefix(Object prefix);
     
-    "Returns a non-empty stream with all the entries in the map whose keys
+    "Returns a non-empty stream with all the entries in this map whose keys
      have the given prefix, or `null` if the map does not contain such an 
      entry."
     shared formal {<Key->Item>+}? oneOrMoreEntriesWithPrefix(Object prefix);
