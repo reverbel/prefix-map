@@ -6,6 +6,37 @@ import ceylon.collection {
 
 class MutableBox<Item>(shared variable Item? content) {}
 
+"""A mutable [[PrefixMap]] implemented using a _ternary search tree_ 
+   whose keys are sequences of [[Comparable]] elements. Map entries 
+   are mantained in lexicographic order of keys, from the smallest
+   to the largest key. The lexicographig ordering of keys relies on 
+   comparisons of [[KeyElement]]s, performed either by the method 
+   `compare` of the interface [[Comparable]] or by a comparator 
+   function specified when the map is created.
+ 
+   Ternary search trees are also known as _lexicographic search trees_.
+   For a very short, formal and precise definition of such trees, see
+   pages 674-676 of Sleator and Tarjan's paper "Self-Adjusting Binary 
+   Search Trees", available [here][sleator-tarjan]. The relevant part
+   is in section 6, "Two Applications of Splaying", starting at the 
+   bottom of page 674 and going up to the first paragraph of page 676. 
+   For a longer discussion, see Bentley and Sedgewick's paper "Fast 
+   Algorithms for Sorting and Searching Strings", available 
+   [here][bentley-sedgewick], or their article "Ternary Search Trees"
+   [in Dr. Dobb's][ternary-search-trees].
+   
+   [sleator-tarjan]: http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf 
+                     "Self-Adjusting Binary Search Trees"
+                     
+   [bentley-sedgewick]: https://www.cs.princeton.edu/~rs/strings/paper.ps
+                        "Fast Algorithms for Sorting and Searching Strings"
+                     
+   [ternary-search-trees]: http://www.drdobbs.com/database/ternary-search-trees/184410528
+                        "Ternary Search Trees" """
+see (`interface PrefixMap`, `interface Map`, `interface MutableMap`,
+     `class Entry`, `interface Comparable`)
+tagged ("Collections")
+by ("Francisco Reverbel")
 shared class TernaryTreeMap<KeyElement, Item> 
         satisfies PrefixMap<KeyElement, Item> 
                   & MutableMap<[KeyElement+], Item> 
@@ -66,11 +97,15 @@ shared class TernaryTreeMap<KeyElement, Item>
     "A comparator function used to sort the entries."
     Comparison compare(KeyElement x, KeyElement y);
         
-    "Create a new `TernaryTreeMap` with the given [[entries]]."
+    "Create a new `TernaryTreeMap` with the given `entries` and the 
+     comparator function specified by the parameter `compare`." 
     shared new (
-        "The initial entries in the map."
+        "The initial entries in the map. If `entries` is absent,
+         an empty map will be created. "
         {<Key->Item>*} entries = {},
-        "A function used to compare the elements of the entries."
+        "A function used to compare key elements.
+         If `compare` is absent, the comparator method of interface
+         [[Comparable]] will be used to compare `KeyElement`s."
         Comparison(KeyElement, KeyElement) compare = 
                 (KeyElement x, KeyElement y) => x.compare(y)) {
         this.entries = entries;
@@ -78,14 +113,15 @@ shared class TernaryTreeMap<KeyElement, Item>
         this.compare = compare;
     }
     
-    "Create a new `TernaryTreeMap` with the same entries as the
-     given [[ternaryTreeMap]]."
+    "Create a new `TernaryTreeMap` with the same entries and 
+     comparator function as the given `TernaryTreeMap`."
     shared new copy(TernaryTreeMap<KeyElement,Item> ternaryTreeMap) {
         entries = {};
         nodeToClone = ternaryTreeMap.root;
         compare = ternaryTreeMap.compare;
     }
     
+    // initialization of root
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
     
@@ -167,9 +203,12 @@ shared class TernaryTreeMap<KeyElement, Item>
         }
     }
 
+    // Add initial entries
     for (key->item in entries) {
         put(key, item);
     }
+    
+    // End of initializer section
     
     Node? lookup(Key key, Node? startingNode = root)
             => let (node = search(key, startingNode))
