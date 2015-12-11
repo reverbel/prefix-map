@@ -1,4 +1,4 @@
-"Run the module `reverbel.prefixmap`."
+"Run the module `herd.reverbel.prefixmap`."
 [Character+] toSequence(String nonEmptyString) {
     value seq = [ for (c in nonEmptyString) c ];
     assert (nonempty seq);
