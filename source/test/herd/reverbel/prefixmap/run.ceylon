@@ -1,10 +1,14 @@
-"Run the module `herd.reverbel.prefixmap`."
+import herd.reverbel.prefixmap {
+    TernaryTreeMap
+}
+
 [Character+] toSequence(String nonEmptyString) {
     value seq = [ for (c in nonEmptyString) c ];
     assert (nonempty seq);
     return seq; 
 }
 
+"Run the module `test.herd.reverbel.prefixmap`."
 shared void run() {
     value map = TernaryTreeMap<Character, Integer>();
     //value s = "Francisco Reverbel";
@@ -13,7 +17,7 @@ shared void run() {
     //print("----");
     //for (c in seq) { print(c); }
     //assert (is [Character+] seq);
-
+    
     variable String s;
     variable Integer? n;
     
@@ -79,7 +83,7 @@ shared void run() {
     n = map.remove(toSequence("cast"));
     print(n);
     print(map);
-
+    
     //n = map.remove(toSequence("caste"));
     n = map.remove(toSequence("cats"));
     print(n);
@@ -90,7 +94,7 @@ shared void run() {
     print(n);
     print(map);
     map.printNodes();
-
+    
     n = map.remove(toSequence("day"));
     print(n);
     print(map);
