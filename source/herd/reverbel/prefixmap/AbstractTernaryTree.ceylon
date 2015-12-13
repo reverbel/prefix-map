@@ -60,14 +60,24 @@ shared class TreeNode<KeyElement, Item>(
     String id =>
             "Node@``hash.string.padLeading(10, '_')``";
     
-    shared actual String string =>
-            "``id``: "
-            + "``element.string.padLeading(paddedElementSize)``, "
-            + "``item?.string?.padLeading(paddedItemSize) else "<null>"``, " 
-            + "``left?.id else "  no left child"``, "
-            + "``middle?.id else "no middle child"``, "
-            + "``right?.id else " no right child"``"
-            + "``if (terminal) then ", T" else "  "``";
+    shared actual String string {
+        value sBuilder = StringBuilder();
+        sBuilder.append(id)
+                .append(": ")
+                .append(element.string.padLeading(paddedElementSize))
+                .append(", ")
+                .append(item?.string?.padLeading(paddedItemSize) else "<null>")
+                .append(", ")
+                .append(left?.id else "  no left child")
+                .append(", ")
+                .append(middle?.id else "no middle child")
+                .append(", ")
+                .append(right?.id else " no right child");
+        if (terminal) {
+            sBuilder.append(", T");
+        }
+        return sBuilder.string;
+    }
 }
 
 shared abstract class AbstractTernaryTree<KeyElement, Item>()
