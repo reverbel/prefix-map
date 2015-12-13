@@ -78,15 +78,17 @@ shared class TernaryTreeMap<KeyElement, Item>
            then nodeToClone.deepCopy() else null;
     
     
-    Node newVerticalPath(Key key, Item item) {
+    Node newVerticalPath(Node? parent, Key key, Item item) {
         variable KeyElement e = key.first;
         variable KeyElement[] rest = key.rest;
-        value head = Node(e, null, null, null, null, false);
+        value head = Node(e);
+        head.parent = parent;
         variable Node node = head; 
         while (nonempty toCopy = rest) {
             e = toCopy.first;
             rest = toCopy.rest;
-            value newNode = Node(e, null, null, null, null, false);
+            value newNode = Node(e);
+            newNode.parent = node;
             node.middle = newNode;
             node = newNode;
         }
@@ -121,7 +123,7 @@ shared class TernaryTreeMap<KeyElement, Item>
             switch (branch)
             case (smaller) {
                 assert(nonempty suffix = keySuffix); 
-                n.left = newVerticalPath(suffix, item);
+                n.left = newVerticalPath(n, suffix, item);
                 return null;  
             }
             case (equal) {
@@ -130,7 +132,7 @@ shared class TernaryTreeMap<KeyElement, Item>
                     assert(!n.middle exists);
                     "any node with no middle child must be terminal"
                     assert(n.terminal);
-                    n.middle = newVerticalPath(suffix, item);
+                    n.middle = newVerticalPath(n, suffix, item);
                     return null;
                 }
                 else if (!n.terminal) {
@@ -146,12 +148,12 @@ shared class TernaryTreeMap<KeyElement, Item>
             }
             case (larger) {
                 assert(nonempty suffix = keySuffix); 
-                n.right = newVerticalPath(suffix, item);
+                n.right = newVerticalPath(n, suffix, item);
                 return null;  
             }
         }
         else {
-            root = newVerticalPath(key, item);
+            root = newVerticalPath(null, key, item);
             return null;
         }
     }

@@ -14,23 +14,20 @@ variable Integer paddedItemSize = 6;
 
 
 shared class TreeNode<KeyElement, Item>(
-    shared KeyElement element,
-    shared variable Item? item, 
-    shared variable TreeNode<KeyElement, Item>? left,
-    shared variable TreeNode<KeyElement, Item>? middle,
-    shared variable TreeNode<KeyElement, Item>? right,
-    shared variable Boolean terminal)
+    shared KeyElement element)
         given KeyElement satisfies Object {
     
+    shared variable Item? item = null; 
+    shared variable TreeNode<KeyElement, Item>? parent = null;
+    shared variable TreeNode<KeyElement, Item>? left = null;
+    shared variable TreeNode<KeyElement, Item>? middle = null;
+    shared variable TreeNode<KeyElement, Item>? right = null;
+    shared variable Boolean terminal = false;
+    
     shared TreeNode<KeyElement, Item> deepCopy() {
-        value copy = TreeNode<KeyElement, Item> {
-            element = this.element;
-            item = this.item;
-            left = null;
-            middle = null;
-            right = null;
-            terminal = this.terminal;
-        };
+        value copy = TreeNode<KeyElement, Item>(this.element);
+        copy.item = this.item;
+        copy.parent = this.parent;
         if (exists l = left) {
             copy.left = l.deepCopy();
         }
@@ -40,6 +37,7 @@ shared class TreeNode<KeyElement, Item>(
         if (exists r = right) {
             copy.right = r.deepCopy();
         }
+        copy.terminal = this.terminal;
         return copy;
     }
     
@@ -85,14 +83,8 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                   & MutableMap<[KeyElement+], Item> 
         given KeyElement satisfies Comparable<KeyElement> {
     
-    shared class Node(KeyElement element,
-                      Item? item, 
-                      TreeNode<KeyElement, Item>? left,
-                      TreeNode<KeyElement, Item>? middle,
-                      TreeNode<KeyElement, Item>? right,
-                      Boolean terminal) 
-            => TreeNode<KeyElement, Item>(element, item, left, 
-                                          middle, right, terminal);
+    shared class Node(KeyElement element) 
+            => TreeNode<KeyElement, Item>(element);
 
     "The root node of the tree."
     shared formal variable Node? root;
