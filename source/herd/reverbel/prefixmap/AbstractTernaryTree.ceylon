@@ -162,11 +162,9 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     
     Key->Item entry(MutableList<KeyElement> keyPrefix, Node terminalNode) {
         assert (terminalNode.terminal);
-        keyPrefix.add(terminalNode.element);
-        assert (nonempty k = [ for (e in keyPrefix) e ]);
-        assert (is Item i = terminalNode.item);
-        keyPrefix.deleteLast();
-        return k->i;
+        assert (is Item item = terminalNode.item);
+        value key = [ for (e in keyPrefix) e ].withTrailing(terminalNode.element);
+        return key->item;
     }
 
      class EntryIterator(keyPrefix, currentNode)
@@ -175,148 +173,157 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         variable Node? currentNode;
         variable Node? previousNode = null;
         shared actual <Key->Item>|Finished next() {
-            if (exists node = currentNode) {
-                value theEntry = entry(keyPrefix, node);
-                // will return theEntry,
-                // but must update the iterator state before returning  
-                variable Node current = node;
-                while (true) {
-                    //print(">>> ``current``");
+            if (exists current = currentNode) {
+                value theEntry = entry(keyPrefix, current);
+                // Will return `theEntry`,
+                // but must update the iterator state before returning
+                variable Node node = current;  
+                variable Boolean done = false;
+                // Leaves the loop below with `node` containing the next
+                // terminal `Node` to visit or with `currentNode` set to null 
+                while (!done) {
+                    print(">>> ``node``");
                     if (exists previous = previousNode) {
-                        previousNode = current;
-                        if (exists left = current.left, previous === left) {
-                            // backtracking from left subtree
-                            if (exists middle = current.middle) {
-                                keyPrefix.add(current.element);
-                                //print(">>>>> ``keyPrefix``");
-                                current = middle;
-                                if (current.terminal) {
-                                    currentNode = current;
-                                    break;
+                        previousNode = node;
+                        if (exists left = node.left, previous === left) {
+                            // Backtracking from left subtree
+                            if (exists middle = node.middle) {
+                                // Proceed to middle subtree
+                                keyPrefix.add(node.element);
+                                print(">>>>> ``keyPrefix``");
+                                node = middle;
+                                if (node.terminal) {
+                                    done = true;
                                 }
                             }
-                            else if (exists right = current.right) {
-                                current = right;
-                                if (current.terminal) {
-                                    currentNode = current;
-                                    break;
+                            else if (exists right = node.right) {
+                                // Proceed to right subtree
+                                node = right;
+                                if (node.terminal) {
+                                    done = true;
                                 }
                             }
-                            else if (exists parent = current.parent){
-                                current = parent;
+                            else if (exists parent = node.parent) {
+                                // Backtrack to parent node
+                                node = parent;
                             }
                             else {
+                                // End of stream
                                 currentNode = null;
-                                break;
+                                done = true;
                             }
                         }
-                        else if (exists middle = current.middle, previous === middle) {
-                            // backtracking from middle subtree
+                        else if (exists middle = node.middle, previous === middle) {
+                            // Backtracking from middle subtree
                             keyPrefix.deleteLast();
-                            //print(">>>>> ``keyPrefix``");
-                            if (exists right = current.right) {
-                                current = right;
-                                if (current.terminal) {
-                                    currentNode = current;
-                                    break;
+                            print(">>>>> ``keyPrefix``");
+                            if (exists right = node.right) {
+                                // Proceed to right subtree
+                                node = right;
+                                if (node.terminal) {
+                                    done = true;
                                 }
                             }
-                            else if (exists parent = current.parent){
-                                current = parent;
+                            else if (exists parent = node.parent){
+                                // Backtrack to parent node
+                                node = parent;
                             }
                             else {
+                                // End of stream
                                 currentNode = null;
-                                break;
+                                done = true;
                             }
                         }
-                        else if (exists right = current.right, previous === right) {
-                            // backtracking from right subtree: backtrack to parent node
-                            if (exists parent = current.parent){
-                                current = parent;
+                        else if (exists right = node.right, previous === right) {
+                            // Backtracking from right subtree 
+                            if (exists parent = node.parent){
+                                // Backtrack to parent node
+                                node = parent;
                             }
                             else {
+                                // End of stream
                                 currentNode = null;
-                                break;
+                                done = true;
                             }
                         }
-                        else if (exists parent = current.parent, previous === parent) {
-                            // coming from the parent node
-                            if (exists left = current.left) {
-                                // proceed to left subtree
-                                current = left;
-                                if (current.terminal) {
-                                    currentNode = current;
-                                    break;
+                        else if (exists parent = node.parent, previous === parent) {
+                            // Coming from the parent node
+                            if (exists left = node.left) {
+                                // Proceed to left subtree
+                                node = left;
+                                if (node.terminal) {
+                                    done = true;
                                 }
                             }
-                            else if (exists middle = current.middle) {
-                                // proceed to middle subtree
-                                keyPrefix.add(current.element);
-                                //print(">>>>> ``keyPrefix``");
-                                current = middle;
-                                if (current.terminal) {
-                                    currentNode = current;
-                                    break;
+                            else if (exists middle = node.middle) {
+                                // Proceed to middle subtree
+                                keyPrefix.add(node.element);
+                                print(">>>>> ``keyPrefix``");
+                                node = middle;
+                                if (node.terminal) {
+                                    done = true;
                                 }
                             }
-                            else if (exists right = current.right) {
-                                // proceed to right subtree
-                                current = right;
-                                if (current.terminal) {
-                                    currentNode = current;
-                                    break;
+                            else if (exists right = node.right) {
+                                // Proceed to right subtree
+                                node = right;
+                                if (node.terminal) {
+                                    done = true;
                                 }
                             }
                             else {
-                                // backtrack to the parent node
-                                current = parent;
+                                // Backtrack to the parent node
+                                node = parent;
                             }
                         }
                         else {
-                            // This point cannot be reached, because it 
-                            // would mean that the previous node exists, 
-                            // but it is neither the parent node nor one 
-                            // of the children nodes.
-                            "this point of the code should never be reached"
+                            // Reaching this point would mean that
+                            // the previous node exists, but it is 
+                            // neither the parent node nor one of 
+                            // the children nodes.
+                            "bug: this code should never be reached"
                             assert(false); 
                         }
                     }
                     else {
                         // Got here because there was no previous node.
-                        // Well, henceforth there will be one.  
-                        previousNode = current;
-                        if (exists middle = current.middle) {
-                            keyPrefix.add(current.element);
-                            //print(">>>>> ``keyPrefix``");
-                            current = middle;
-                            if (current.terminal) {
-                                currentNode = current;
-                                break;
+                        // This must be the very first call to `next()`.
+                        // Well, henceforth there will be a previous node.  
+                        previousNode = node;
+                        if (exists middle = node.middle) {
+                            // Proceed to middle subtree
+                            keyPrefix.add(node.element);
+                            print(">>>>> ``keyPrefix``");
+                            node = middle;
+                            if (node.terminal) {
+                                done = true;
                             }
                         }
-                        else if (exists right = current.right) {
-                            current = right;
-                            if (current.terminal) {
-                                currentNode = current;
-                                break;
+                        else if (exists right = node.right) {
+                            // Proceed to right subtree
+                            node = right;
+                            if (node.terminal) {
+                                done = true;
                             }
                         }
-                        else if (exists parent = current.parent) {
-                            current = parent;
-                            if (current.terminal) {
-                                currentNode = current;
-                                break;
+                        else if (exists parent = node.parent) {
+                            // Backtrack to parent
+                            node = parent;
+                            if (node.terminal) {
+                                done = true;
                             }
                         }
                         else {
+                            // End of stream
                             currentNode = null;    
-                            break;
+                            done = true;
                         }
                     }
                 }
-                if (exists n = currentNode) {
-                    "at this point currentNode must be terminal"
-                    assert (n.terminal);
+                if (currentNode exists) {
+                    currentNode = node;
+                    "at this point `node` must be terminal"
+                    assert (node.terminal);
                 }
                 return theEntry;
             }
