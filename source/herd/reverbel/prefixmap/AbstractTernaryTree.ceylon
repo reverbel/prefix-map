@@ -183,12 +183,12 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 while (true) {
                     //print(">>> ``current``");
                     if (exists previous = previousNode) {
+                        previousNode = current;
                         if (exists left = current.left, previous === left) {
                             // backtracking from left subtree
                             if (exists middle = current.middle) {
                                 keyPrefix.add(current.element);
                                 //print(">>>>> ``keyPrefix``");
-                                previousNode = current;
                                 current = middle;
                                 if (current.terminal) {
                                     currentNode = current;
@@ -196,7 +196,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 }
                             }
                             else if (exists right = current.right) {
-                                previousNode = current;
                                 current = right;
                                 if (current.terminal) {
                                     currentNode = current;
@@ -204,7 +203,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 }
                             }
                             else if (exists parent = current.parent){
-                                previousNode = current;
                                 current = parent;
                             }
                             else {
@@ -217,7 +215,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                             keyPrefix.deleteLast();
                             //print(">>>>> ``keyPrefix``");
                             if (exists right = current.right) {
-                                previousNode = current;
                                 current = right;
                                 if (current.terminal) {
                                     currentNode = current;
@@ -225,7 +222,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 }
                             }
                             else if (exists parent = current.parent){
-                                previousNode = current;
                                 current = parent;
                             }
                             else {
@@ -236,7 +232,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                         else if (exists right = current.right, previous === right) {
                             // backtracking from right subtree: backtrack to parent node
                             if (exists parent = current.parent){
-                                previousNode = current;
                                 current = parent;
                             }
                             else {
@@ -248,7 +243,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                             // coming from the parent node
                             if (exists left = current.left) {
                                 // proceed to left subtree
-                                previousNode = current;
                                 current = left;
                                 if (current.terminal) {
                                     currentNode = current;
@@ -259,7 +253,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 // proceed to middle subtree
                                 keyPrefix.add(current.element);
                                 //print(">>>>> ``keyPrefix``");
-                                previousNode = current;
                                 current = middle;
                                 if (current.terminal) {
                                     currentNode = current;
@@ -268,7 +261,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                             }
                             else if (exists right = current.right) {
                                 // proceed to right subtree
-                                previousNode = current;
                                 current = right;
                                 if (current.terminal) {
                                     currentNode = current;
@@ -277,7 +269,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                             }
                             else {
                                 // backtrack to the parent node
-                                previousNode = current;
                                 current = parent;
                             }
                         }
@@ -290,36 +281,37 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                             assert(false); 
                         }
                     }
-                    else if (exists middle = current.middle) {
-                        keyPrefix.add(current.element);
-                        //print(">>>>> ``keyPrefix``");
-                        previousNode = current;
-                        current = middle;
-                        if (current.terminal) {
-                            currentNode = current;
-                            break;
-                         }
-                    }
-                    else if (exists right = current.right) {
-                        previousNode = current;
-                        current = right;
-                        if (current.terminal) {
-                            currentNode = current;
-                            break;
-                        }
-                    }
-                    else if (exists parent = current.parent) {
-                        previousNode = current;
-                        current = parent;
-                        if (current.terminal) {
-                            currentNode = current;
-                            break;
-                        }
-                    }
                     else {
+                        // Got here because there was no previous node.
+                        // Well, henceforth there will be one.  
                         previousNode = current;
-                        currentNode = null;    
-                        break;
+                        if (exists middle = current.middle) {
+                            keyPrefix.add(current.element);
+                            //print(">>>>> ``keyPrefix``");
+                            current = middle;
+                            if (current.terminal) {
+                                currentNode = current;
+                                break;
+                            }
+                        }
+                        else if (exists right = current.right) {
+                            current = right;
+                            if (current.terminal) {
+                                currentNode = current;
+                                break;
+                            }
+                        }
+                        else if (exists parent = current.parent) {
+                            current = parent;
+                            if (current.terminal) {
+                                currentNode = current;
+                                break;
+                            }
+                        }
+                        else {
+                            currentNode = null;    
+                            break;
+                        }
                     }
                 }
                 if (exists n = currentNode) {
