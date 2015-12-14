@@ -113,6 +113,260 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
             => if (is Key key) 
                then lookup(key) exists 
                else keys.any(key.equals);
+
+    Node? firstTerminalNode(MutableList<KeyElement> key) {
+        if (exists node = root) {
+            variable Node current = node;
+            while (true) {
+                while (exists left = current.left) {
+                    current = left;
+                }
+                if (!current.terminal) {
+                    assert (exists middle = current.middle);
+                    key.add(current.element);
+                    current = middle;
+                }
+                else {
+                    key.add(current.element);
+                    return current;
+                }
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    
+    Node? lastTerminalNode(MutableList<KeyElement> key) {
+        if (exists node = root) {
+            variable Node current = node;
+            while (true) {
+                while (exists right = current.right) {
+                    current = right;
+                }
+                if (exists middle = current.middle) {
+                    key.add(current.element);
+                    current = middle;
+                }
+                else {
+                    assert (current.terminal);
+                    key.add(current.element);
+                    return current;
+                }
+            }
+        }
+        else {
+            return null;
+        }
+    }
+    
+    Key->Item entry(MutableList<KeyElement> keyPrefix, Node terminalNode) {
+        assert (terminalNode.terminal);
+        keyPrefix.add(terminalNode.element);
+        assert (nonempty k = [ for (e in keyPrefix) e ]);
+        assert (is Item i = terminalNode.item);
+        keyPrefix.deleteLast();
+        return k->i;
+    }
+
+     class EntryIterator(keyPrefix, currentNode)
+            satisfies Iterator<Key->Item> {
+        MutableList<KeyElement> keyPrefix;
+        variable Node? currentNode;
+        variable Node? previousNode = null;
+        shared actual <Key->Item>|Finished next() {
+            if (exists node = currentNode) {
+                value theEntry = entry(keyPrefix, node);
+                // will return theEntry,
+                // but must update the iterator state before returning  
+                variable Node current = node;
+                while (true) {
+                    //print(">>> ``current``");
+                    if (exists previous = previousNode) {
+                        if (exists left = current.left, previous === left) {
+                            // backtracking from left subtree
+                            if (exists middle = current.middle) {
+                                keyPrefix.add(current.element);
+                                //print(">>>>> ``keyPrefix``");
+                                previousNode = current;
+                                current = middle;
+                                if (current.terminal) {
+                                    currentNode = current;
+                                    break;
+                                }
+                            }
+                            else if (exists right = current.right) {
+                                previousNode = current;
+                                current = right;
+                                if (current.terminal) {
+                                    currentNode = current;
+                                    break;
+                                }
+                            }
+                            else if (exists parent = current.parent){
+                                previousNode = current;
+                                current = parent;
+                            }
+                            else {
+                                currentNode = null;
+                                break;
+                            }
+                        }
+                        else if (exists middle = current.middle, previous === middle) {
+                            // backtracking from middle subtree
+                            keyPrefix.deleteLast();
+                            //print(">>>>> ``keyPrefix``");
+                            if (exists right = current.right) {
+                                previousNode = current;
+                                current = right;
+                                if (current.terminal) {
+                                    currentNode = current;
+                                    break;
+                                }
+                            }
+                            else if (exists parent = current.parent){
+                                previousNode = current;
+                                current = parent;
+                            }
+                            else {
+                                currentNode = null;
+                                break;
+                            }
+                        }
+                        else if (exists right = current.right, previous === right) {
+                            // backtracking from right subtree: backtrack to parent node
+                            if (exists parent = current.parent){
+                                previousNode = current;
+                                current = parent;
+                            }
+                            else {
+                                currentNode = null;
+                                break;
+                            }
+                        }
+                        else if (exists parent = current.parent, previous === parent) {
+                            // coming from the parent node
+                            if (exists left = current.left) {
+                                // proceed to left subtree
+                                previousNode = current;
+                                current = left;
+                                if (current.terminal) {
+                                    currentNode = current;
+                                    break;
+                                }
+                            }
+                            else if (exists middle = current.middle) {
+                                // proceed to middle subtree
+                                keyPrefix.add(current.element);
+                                //print(">>>>> ``keyPrefix``");
+                                previousNode = current;
+                                current = middle;
+                                if (current.terminal) {
+                                    currentNode = current;
+                                    break;
+                                }
+                            }
+                            else if (exists right = current.right) {
+                                // proceed to right subtree
+                                previousNode = current;
+                                current = right;
+                                if (current.terminal) {
+                                    currentNode = current;
+                                    break;
+                                }
+                            }
+                            else {
+                                // backtrack to the parent node
+                                previousNode = current;
+                                current = parent;
+                            }
+                        }
+                        else {
+                            // This point cannot be reached, because it 
+                            // would mean that the previous node exists, 
+                            // but it is neither the parent node nor one 
+                            // of the children nodes.
+                            "this point of the code should never be reached"
+                            assert(false); 
+                        }
+                    }
+                    else if (exists middle = current.middle) {
+                        keyPrefix.add(current.element);
+                        //print(">>>>> ``keyPrefix``");
+                        previousNode = current;
+                        current = middle;
+                        if (current.terminal) {
+                            currentNode = current;
+                            break;
+                         }
+                    }
+                    else if (exists right = current.right) {
+                        previousNode = current;
+                        current = right;
+                        if (current.terminal) {
+                            currentNode = current;
+                            break;
+                        }
+                    }
+                    else if (exists parent = current.parent) {
+                        previousNode = current;
+                        current = parent;
+                        if (current.terminal) {
+                            currentNode = current;
+                            break;
+                        }
+                    }
+                    else {
+                        previousNode = current;
+                        currentNode = null;    
+                        break;
+                    }
+                }
+                if (exists n = currentNode) {
+                    "at this point currentNode must be terminal"
+                    assert (n.terminal);
+                }
+                return theEntry;
+            }
+            else {
+                return finished;
+            }
+            
+        }
+    }
+
+    shared <Key->Item>? firstEntry {
+        value key = ArrayList<KeyElement>();
+        if (exists node = firstTerminalNode(key)) {
+            assert (nonempty k = [ for (e in key) e ]);
+            assert (is Item i = node.item);
+            return k->i;
+        }
+        else {
+            return null;
+        }
+    }
+    
+    shared <Key->Item>? lastEntry {
+        value key = ArrayList<KeyElement>();
+        if (exists node = lastTerminalNode(key)) {
+            assert (nonempty k = [ for (e in key) e ]);
+            assert (is Item i = node.item);
+            return k->i;
+        }
+        else {
+            return null;
+        }
+    }
+    
+    shared Iterator<Key->Item> newIterator() {
+        value key = ArrayList<KeyElement>();
+        value node = firstTerminalNode(key);
+        if (node exists) {
+            key.deleteLast();
+        }
+        return EntryIterator(key, node);
+    }
     
     // Puts in the given `queue` all the entries with the given 
     // `keyPrefix` in the subtree rooted at the given `node`. 

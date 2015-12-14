@@ -102,8 +102,35 @@ shared test void testMultipleEntryTreeMap() {
         entries = { for (str in strings) toSequence(str) -> str.size };
         Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
     };
-    print(map);
+    print(m);
     n = m.get(toSequence("dOnUt"));
     print(n);
+    
+    print(m.firstEntry);
+    print(m.lastEntry);
+    
+    value x15 = TernaryTreeMap({ toSequence("X")-> 15 });
+    print(x15.firstEntry);
+    print(x15.lastEntry);
+    
+    value aaa = TernaryTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2, toSequence("abc")-> 3});
+    print(aaa.firstEntry);
+    print(aaa.lastEntry);
+
+    print("---------------");
+    value it = aaa.newIterator();
+    while (!is Finished next = it.next()) {
+        print(next);
+    }
+    
+    print("---------------");
+    print(m);
+    value iter = m.newIterator();
+    while (!is Finished next = iter.next()) {
+        print(next);
+    }
+    
+
+    
         
 }
