@@ -330,7 +330,7 @@ shared class TernaryTreeMap<KeyElement, Item>
                     else {
                         // no: 
                         // cannot remove anything
-                        "sanity check: a non terminal node cannot be a leaf node"
+                        "a non-terminal node cannot be a leaf node"
                         assert(!leaf(node));
                         return node;
                     }

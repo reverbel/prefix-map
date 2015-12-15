@@ -168,7 +168,8 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     Key->Item entry(MutableList<KeyElement> keyPrefix, Node terminalNode) {
         assert (terminalNode.terminal);
         assert (is Item item = terminalNode.item);
-        value key = [ for (e in keyPrefix) e ].withTrailing(terminalNode.element);
+        value key =
+                [ for (e in keyPrefix) e ].withTrailing(terminalNode.element);
         return key->item;
     }
 
@@ -218,7 +219,8 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 done = true;
                             }
                         }
-                        else if (exists middle = node.middle, previous === middle) {
+                        else if (exists middle = node.middle,
+                                 previous === middle) {
                             // Backtracking from middle subtree
                             keyPrefix.deleteLast();
                             print(">>>>> ``keyPrefix``");
@@ -239,7 +241,8 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 done = true;
                             }
                         }
-                        else if (exists right = node.right, previous === right) {
+                        else if (exists right = node.right,
+                                 previous === right) {
                             // Backtracking from right subtree 
                             if (exists parent = node.parent){
                                 // Backtrack to parent node
@@ -251,7 +254,8 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 done = true;
                             }
                         }
-                        else if (exists parent = node.parent, previous === parent) {
+                        else if (exists parent = node.parent,
+                                 previous === parent) {
                             // Coming from the parent node
                             if (exists left = node.left) {
                                 // Proceed to left subtree

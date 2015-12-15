@@ -14,7 +14,9 @@ tagged ("Collections")
 by ("Francisco Reverbel")
 shared interface PrefixMap<KeyElement, out Item>
         satisfies SortedMap<[KeyElement+],Item>
-                  & Ranged<[KeyElement+],[KeyElement+]->Item,PrefixMap<KeyElement,Item>>
+                  & Ranged<[KeyElement+],
+                           [KeyElement+]->Item,
+                           PrefixMap<KeyElement,Item>>
         given KeyElement satisfies Comparable<KeyElement> {
     
     "The type of the keys of this `PrefixMap`. A `Key` is a non-empty 
