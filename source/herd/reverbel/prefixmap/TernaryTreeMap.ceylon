@@ -222,9 +222,6 @@ shared class TernaryTreeMap<KeyElement, Item>
     Boolean leaf(Node n)
             => !(n.left exists) && !(n.middle exists) && !(n.right exists);
     
-    Boolean danglingLeaf(Node n)
-            => !n.terminal && leaf(n);
-    
     Node? removeNodes(Node? node, MutableBox<Item> itemRemoved, Key key) {
         if (!exists node) {
             return null;
@@ -235,20 +232,43 @@ shared class TernaryTreeMap<KeyElement, Item>
             switch (compare(first, e))
             case (smaller) {
                 node.left = removeNodes(node.left, itemRemoved, key);
-                return if (danglingLeaf(node)) then null else node;
+                if (exists left = node.left) {
+                    left.parent = node;
+                    return node;
+                }
+                else if (!node.terminal && !(node.middle exists)
+                                        && !(node.right exists)) {
+                    return null; // prune non-terminal leaf node
+                }
+                else {
+                    return node;
+                }
             }
             case (larger) {
                 node.right = removeNodes(node.right, itemRemoved, key);
-                return if (danglingLeaf(node)) then null else node;
+                if (exists right = node.right) {
+                    right.parent = node;
+                    return node;
+                }
+                else if (!node.terminal && !(node.left exists) 
+                                        && !(node.middle exists)) {
+                    return null; // prune non-terminal leaf node
+                }
+                else {
+                    return node;
+                }
             }
             case (equal) {
                 if (nonempty rest = key.rest) {
-                    node.middle = removeNodes(node.middle, itemRemoved, rest);  
+                    node.middle = removeNodes(node.middle, itemRemoved, rest);
+                    if (exists middle = node.middle) {
+                        middle.parent = node;
+                    }
                     
                     Node? retNode; // The node to be returned by this method
-                    // If `curNode` remains in the tree, `retNode` will be 
-                    // `curNode`. Otherwise, `retNode` will be either null
-                    // or a node that takes the place of `curNode`.
+                    // If `node` remains in the tree, `retNode` will be 
+                    // `node`. Otherwise, `retNode` will be either null
+                    // or a node that takes the place of `node`.
                     
                     if (!node.terminal && !(node.middle exists)) {
                         // prune non-terminal nodes with no middle child 
@@ -262,28 +282,30 @@ shared class TernaryTreeMap<KeyElement, Item>
                             //  (The other way around would also work.)
                             Node descendRightmostBranch(Node n)
                                     => if (exists rc = n.right)
-                            then descendRightmostBranch(rc)
-                            else n;
-                            descendRightmostBranch(l).right = r;
+                                       then descendRightmostBranch(rc)
+                                       else n;
+                            value n = descendRightmostBranch(l);
+                            n.right = r;
+                            r.parent = n; 
                             retNode = l;
                         }
                         else if (!(node.left exists)) {
-                            // right child will replace `curNode`
+                            // right child will replace `node`
                             retNode = node.right; // possibly null
                         }
-                        else { // (!(curNode.right exists))
-                            // left child will replace `curNode`
+                        else { // (!(node.right exists))
+                            // left child will replace `node`
                             retNode = node.left;
                         }
                     }
                     else {
-                        // `curNode` remains in the tree
+                        // `node` remains in the tree
                         retNode = node;
                     }
                     return retNode;
                 }
                 else {
-                    // current node has the last element of the key
+                    // `node` has the last element of the key
                     // is it a terminal node?
                     if (node.terminal) {
                         // yes: 
@@ -296,7 +318,7 @@ shared class TernaryTreeMap<KeyElement, Item>
                         assert(is Item removedItem);
                         itemRemoved.content = removedItem;
                         if (leaf(node)) {
-                            // current node is a leaf: remove it
+                            // `node` is a leaf: remove it
                             return null; 
                         }
                         else {
@@ -322,11 +344,13 @@ shared class TernaryTreeMap<KeyElement, Item>
             content = null;
         };
         root = removeNodes(root, itemRemoved, key);
+        if (exists r = root) {
+            r.parent = null;
+        }
         return itemRemoved.content; 
     }
     
     shared actual TernaryTreeMap<KeyElement, Item> clone() 
             => copy(this);
-    
 
 }

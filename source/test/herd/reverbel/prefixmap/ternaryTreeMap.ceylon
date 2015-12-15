@@ -106,31 +106,28 @@ shared test void testMultipleEntryTreeMap() {
     n = m.get(toSequence("dOnUt"));
     print(n);
     
-    print(m.firstEntry);
-    print(m.lastEntry);
+    print(m.first);
+    print(m.last);
     
     value x15 = TernaryTreeMap({ toSequence("X")-> 15 });
-    print(x15.firstEntry);
-    print(x15.lastEntry);
+    print(x15.first);
+    print(x15.last);
     
     value aaa = TernaryTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2, toSequence("abc")-> 3});
-    print(aaa.firstEntry);
-    print(aaa.lastEntry);
+    print(aaa.first);
+    print(aaa.last);
 
     print("---------------");
-    value it = aaa.newIterator();
+    value it = aaa.iterator();
     while (!is Finished next = it.next()) {
         print(next);
     }
     
     print("---------------");
     print(m);
-    value iter = m.newIterator();
+    value iter = m.iterator();
     while (!is Finished next = iter.next()) {
         print(next);
     }
-    
 
-    
-        
 }

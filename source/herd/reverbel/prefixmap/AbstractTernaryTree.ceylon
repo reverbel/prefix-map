@@ -27,15 +27,20 @@ shared class TreeNode<KeyElement, Item>(
     shared TreeNode<KeyElement, Item> deepCopy() {
         value copy = TreeNode<KeyElement, Item>(this.element);
         copy.item = this.item;
-        copy.parent = this.parent;
         if (exists l = left) {
-            copy.left = l.deepCopy();
+            value lCopy = l.deepCopy();
+            lCopy.parent = copy;
+            copy.left = lCopy;
         }
         if (exists m = middle) {
-            copy.middle = m.deepCopy();
+            value mCopy = m.deepCopy();
+            mCopy.parent = copy;
+            copy.middle = mCopy;
         }
         if (exists r = right) {
-            copy.right = r.deepCopy();
+            value rCopy = r.deepCopy();
+            rCopy.parent = copy;
+            copy.right = rCopy;
         }
         copy.terminal = this.terminal;
         return copy;
@@ -334,7 +339,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         }
     }
 
-    shared <Key->Item>? firstEntry {
+    shared actual <Key->Item>? first {
         value key = ArrayList<KeyElement>();
         if (exists node = firstTerminalNode(key)) {
             assert (nonempty k = [ for (e in key) e ]);
@@ -346,7 +351,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         }
     }
     
-    shared <Key->Item>? lastEntry {
+    shared actual <Key->Item>? last {
         value key = ArrayList<KeyElement>();
         if (exists node = lastTerminalNode(key)) {
             assert (nonempty k = [ for (e in key) e ]);
@@ -358,7 +363,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         }
     }
     
-    shared Iterator<Key->Item> newIterator() {
+    shared actual Iterator<Key->Item> iterator() {
         value key = ArrayList<KeyElement>();
         value node = firstTerminalNode(key);
         if (node exists) {
@@ -393,7 +398,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         }
     }
     
-    shared actual Iterator<Key->Item> iterator() {
+    shared Iterator<Key->Item> eagerIterator() {
         value queue = ArrayList<Key->Item>();
         enumerateEntries(root, ArrayList<KeyElement>(), queue);
         return queue.iterator();
