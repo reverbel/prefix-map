@@ -123,10 +123,10 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         if (exists node = root) {
             variable Node current = node;
             while (true) {
-                while (exists left = current.left) {
+                if (exists left = current.left) {
                     current = left;
                 }
-                if (!current.terminal) {
+                else if (!current.terminal) {
                     assert (exists middle = current.middle);
                     key.add(current.element);
                     current = middle;
@@ -146,10 +146,10 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         if (exists node = root) {
             variable Node current = node;
             while (true) {
-                while (exists right = current.right) {
+                if (exists right = current.right) {
                     current = right;
                 }
-                if (exists middle = current.middle) {
+                else if (exists middle = current.middle) {
                     key.add(current.element);
                     current = middle;
                 }
