@@ -27,8 +27,8 @@ shared interface PrefixMap<KeyElement, out Item>
      `false` otherwise."
     shared formal Boolean hasKeyWithPrefix(Object prefix);
     
-    "Returns a stream containing all the keys of this map with the given
-     prefix."
+    "Returns a stream containing all the keys with the given prefix
+     that are present in this map."
     shared formal {Key*} keysWithPrefix(Object prefix);
     
     "Returns a stream with all the entries in this map whose keys have the
