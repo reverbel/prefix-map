@@ -28,19 +28,19 @@ shared class TreeNode<KeyElement, Item>(
         value copy = TreeNode<KeyElement, Item>(this.element);
         copy.item = this.item;
         if (exists l = left) {
-            value lCopy = l.deepCopy();
-            lCopy.parent = copy;
-            copy.left = lCopy;
+            value leftCopy = l.deepCopy();
+            leftCopy.parent = copy;
+            copy.left = leftCopy;
         }
         if (exists m = middle) {
-            value mCopy = m.deepCopy();
-            mCopy.parent = copy;
-            copy.middle = mCopy;
+            value middleCopy = m.deepCopy();
+            middleCopy.parent = copy;
+            copy.middle = middleCopy;
         }
         if (exists r = right) {
-            value rCopy = r.deepCopy();
-            rCopy.parent = copy;
-            copy.right = rCopy;
+            value rightCopy = r.deepCopy();
+            rightCopy.parent = copy;
+            copy.right = rightCopy;
         }
         copy.terminal = this.terminal;
         return copy;
