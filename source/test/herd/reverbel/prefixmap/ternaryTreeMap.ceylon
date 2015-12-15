@@ -3,7 +3,8 @@ import ceylon.test { test, assertTrue, assertFalse,
                      assertEquals, assertNotEquals }
 
 [Character+] toSequence(String nonEmptyString) {
-    value seq = [ for (c in nonEmptyString) c ];
+    //value seq = [ for (c in nonEmptyString) c ];
+    value seq = nonEmptyString.sequence();
     "parameter `nonEmptyString` is supposed to be a non-empty String"
     assert (nonempty seq);
     return seq; 
