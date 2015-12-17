@@ -119,9 +119,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                then lookup(key) exists 
                else keys.any(key.equals);
 
-    Node? firstTerminalNode(MutableList<KeyElement> key, 
-                            Node? root = this.root) {
-        variable Integer addCount = 0;
+    Node? firstTerminalNode(MutableList<KeyElement> key, Node? root) {
         if (exists node = root) {
             variable Node current = node;
             while (true) {
@@ -130,7 +128,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 }
                 else { 
                     key.add(current.element);
-                    addCount++;
                     if (!current.terminal) {
                         assert (exists middle = current.middle);
                         current = middle;
@@ -142,16 +139,11 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
             }
         }
         else {
-            while (addCount-- > 0) {
-                key.deleteLast();
-            }
             return null;
         }
     }
     
-    Node? lastTerminalNode(MutableList<KeyElement> key,
-                           Node? root = this.root) {
-        variable Integer addCount = 0;
+    Node? lastTerminalNode(MutableList<KeyElement> key, Node? root) {
         if (exists node = root) {
             variable Node current = node;
             while (true) {
@@ -160,7 +152,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 }
                 else {
                     key.add(current.element);
-                    addCount++;
                     if (exists middle = current.middle) {
                         current = middle;
                     }
@@ -172,9 +163,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
             }
         }
         else {
-            while (addCount-- > 0) {
-                key.deleteLast();
-            }
             return null;
         }
     }
@@ -567,7 +555,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     
     shared actual <Key->Item>? first {
         value key = ArrayList<KeyElement>();
-        if (exists node = firstTerminalNode(key)) {
+        if (exists node = firstTerminalNode(key, root)) {
             assert (nonempty k = [ for (e in key) e ]);
             assert (is Item i = node.item);
             return k->i;
@@ -579,7 +567,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     
     shared actual <Key->Item>? last {
         value key = ArrayList<KeyElement>();
-        if (exists node = lastTerminalNode(key)) {
+        if (exists node = lastTerminalNode(key, root)) {
             assert (nonempty k = [ for (e in key) e ]);
             assert (is Item i = node.item);
             return k->i;
@@ -591,7 +579,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     
     shared actual Iterator<Key->Item> iterator() {
         value key = ArrayList<KeyElement>();
-        value node = firstTerminalNode(key);
+        value node = firstTerminalNode(key, root);
         if (node exists) {
             key.deleteLast();
         }
