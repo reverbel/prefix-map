@@ -130,5 +130,49 @@ shared test void testMultipleEntryTreeMap() {
     while (!is Finished next = iter.next()) {
         print(next);
     }
+    
+    print("=========================================================================");
+    print(m.higherEntries(toSequence("bat")));
+    
+    print("=========================================================================");
+    print(m.higherEntries(toSequence("bates")));
+    
+    print("=========================================================================");
+    print(m.higherEntries(toSequence("dont")));
+    
+    print("=========================================================================");
+    print(m.lowerEntries(toSequence("dont")));
+
+    print("*************************************************************************");    
+    print(m);
+    print("\n");
+    print("\n");
+    print("\n");
+    print("\n");
+    print("*************************************************************************");    
+    print(m.higherEntries(toSequence("as")));
+    print("\n");
+    print("\n");
+    print("\n");
+    print("\n");
+    print("*************************************************************************");    
+    print(m.lowerEntries(toSequence("z")));
+    print("\n");
+    print("\n");
+    print("\n");
+    print("\n");
+    print(aaa);
+    print(aaa.lowerEntries(toSequence("z")));    
+    print("\n");
+    print("\n");
+    print("\n");
+    print("\n");
+    
+    value ab = TernaryTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2});
+    print(ab);
+    print("\n");
+    print("\n");
+    print(ab.lowerEntries(toSequence("z")));    
+
 
 }
