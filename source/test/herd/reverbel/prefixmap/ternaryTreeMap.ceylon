@@ -1,6 +1,7 @@
 import herd.reverbel.prefixmap { TernaryTreeMap }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
+import ceylon.file { ... }
 
 [Character+] toSequence(String nonEmptyString) {
     //value seq = [ for (c in nonEmptyString) c ];
@@ -8,6 +9,14 @@ import ceylon.test { test, assertTrue, assertFalse,
     "parameter `nonEmptyString` is supposed to be a non-empty String"
     assert (nonempty seq);
     return seq; 
+}
+
+String toString([Character+] charSeq) {
+    value strBuilder = StringBuilder();
+    for (c in charSeq) {
+        strBuilder.appendCharacter(c);
+    }
+    return strBuilder.string;
 }
 
 shared test void testEmptyTreeMap() {
@@ -173,6 +182,67 @@ shared test void testMultipleEntryTreeMap() {
     print("\n");
     print("\n");
     print(ab.lowerEntries(toSequence("z")));    
+}
 
+shared test void testWithFullDictionary() {
+    value inputFilePath = parsePath("/home/reverbel/american-english.shuffled");
+    if (is File inputFile = inputFilePath.resource) {
+        value outputFilePath = home.childPath("american-english.iterated");
+        value toDelete = outputFilePath.resource;
+        if (is ExistingResource toDelete) {
+            toDelete.delete();
+        }
+        value loc = outputFilePath.resource;
+        assert (is Nil loc);
+        value outputFile = loc.createFile();
+        
+        value outputFilePath2 = home.childPath("american-english.reverse-iterated");
+        value toDelete2 = outputFilePath2.resource;
+        if (is ExistingResource toDelete2) {
+            toDelete2.delete();
+        }
+        value loc2 = outputFilePath2.resource;
+        assert (is Nil loc2);
+        value outputFile2 = loc2.createFile();
 
+        
+        try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
+                                          writer2 = outputFile2.Overwriter()) {
+            value map = TernaryTreeMap<Character, Integer>();
+            while (exists word = reader.readLine()) { 
+                map.put(toSequence(word), word.size);
+            }
+            for (entry in map) {
+                writer.writeLine(toString(entry.key));  
+            }
+            //map.printNodes();
+            if (exists last = map.last) {
+                for (entry in map.lowerEntries(last.key)) {
+                    writer2.writeLine(toString(entry.key));  
+                }
+            }
+            
+            //for (str in ["B", "C", "i", "r"]) {
+            //    value item = map.get(toSequence(str));
+            //    if (exists item) {
+            //        print("``str`` -> ``item``");
+            //    }
+            //}
+            //for (key in map.keys) {
+            //    if (toString(key) == "B") {
+            //        print("Found key B!");
+            //    }
+            //}
+            //value it = map.eagerIterator();
+            //while (!is Finished entry = it.next()) {
+            //    if (toString(entry.key) == "B") {
+            //        print("Found key B!");
+            //    }
+            //}
+        }
+    }
+    else {
+        print("input file does not exist");
+    }
+    
 }
