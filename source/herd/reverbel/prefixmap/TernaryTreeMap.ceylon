@@ -350,6 +350,28 @@ shared class TernaryTreeMap<KeyElement, Item>
         return itemRemoved.content; 
     }
     
+    shared actual TernaryTreeMap<KeyElement,Item> measure(Key from, 
+                                                          Integer length)
+            => TernaryTreeMap(higherEntries(from).take(length), compare);
+    
+    shared actual TernaryTreeMap<KeyElement,Item> span(Key from, Key to)
+            => let (reverse = compareKeys(from,to)==larger)
+                TernaryTreeMap { 
+                    entries = reverse then descendingEntries(from,to) 
+                                      else ascendingEntries(from,to);
+                    compare(KeyElement x, KeyElement y) 
+                            => reverse then compare(y,x)
+                                       else compare(x,y); 
+    };
+    
+    shared actual TernaryTreeMap<KeyElement,Item> spanFrom(Key from)
+            => TernaryTreeMap(higherEntries(from), compare);
+    
+    shared actual TernaryTreeMap<KeyElement,Item> spanTo(Key to)     
+            => TernaryTreeMap(
+                    takeWhile((entry) => compareKeys(entry.key,to) != larger), 
+                    compare);
+    
     shared actual TernaryTreeMap<KeyElement, Item> clone() 
             => copy(this);
 

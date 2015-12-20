@@ -71,6 +71,8 @@ shared class TreeNode<KeyElement, Item>(
                 .append(", ")
                 .append(item?.string?.padLeading(paddedItemSize) else "<null>")
                 .append(", ")
+                .append(parent?.id else "      no parent")
+                .append(", ")
                 .append(left?.id else "  no left child")
                 .append(", ")
                 .append(middle?.id else "no middle child")
@@ -187,104 +189,83 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 // but must update the iterator state before returning
                 variable Node node = current;  
                 variable Boolean done = false;
+                void proceedTo(Node n) {
+                    node = n;
+                    if (node.terminal && !node.left exists) {
+                        done = true;
+                    }
+                }
+                void backtrackTo(Node parent) {
+                    if (parent.terminal, exists leftSibling = parent.left, 
+                                         leftSibling === node) {
+                        done = true;
+                    }
+                    node = parent;
+                }
+                void endOfStream() {
+                    currentNode = null;
+                    done = true;
+                }
                 // Leaves the loop below with `node` containing the next
                 // terminal `Node` to visit or with `currentNode` set to null 
                 while (!done) {
-                    print(">>> ``node``");
                     if (exists previous = previousNode) {
                         previousNode = node;
                         if (exists left = node.left, previous === left) {
-                            // Backtracking from left subtree
+                            // Backtracking from left subtree --------------
                             if (exists middle = node.middle) {
-                                // Proceed to middle subtree
                                 keyPrefix.add(node.element);
-                                print(">>>>> ``keyPrefix``");
-                                node = middle;
-                                if (node.terminal) {
-                                    done = true;
-                                }
+                                proceedTo(middle);
                             }
                             else if (exists right = node.right) {
-                                // Proceed to right subtree
-                                node = right;
-                                if (node.terminal) {
-                                    done = true;
-                                }
+                                proceedTo(right);
                             }
                             else if (exists parent = node.parent) {
-                                // Backtrack to parent node
-                                node = parent;
+                                backtrackTo(parent);
                             }
                             else {
-                                // End of stream
-                                currentNode = null;
-                                done = true;
+                                endOfStream();
                             }
                         }
                         else if (exists middle = node.middle,
                                  previous === middle) {
-                            // Backtracking from middle subtree
+                            // Backtracking from middle subtree ------------
                             keyPrefix.deleteLast();
-                            print(">>>>> ``keyPrefix``");
                             if (exists right = node.right) {
-                                // Proceed to right subtree
-                                node = right;
-                                if (node.terminal) {
-                                    done = true;
-                                }
+                                proceedTo(right);
                             }
                             else if (exists parent = node.parent) {
-                                // Backtrack to parent node
-                                node = parent;
+                                backtrackTo(parent);
                             }
                             else {
-                                // End of stream
-                                currentNode = null;
-                                done = true;
+                                endOfStream();
                             }
                         }
                         else if (exists right = node.right,
                                  previous === right) {
-                            // Backtracking from right subtree 
+                            // Backtracking from right subtree -------------
                             if (exists parent = node.parent) {
-                                // Backtrack to parent node
-                                node = parent;
+                                backtrackTo(parent);
                             }
                             else {
-                                // End of stream
-                                currentNode = null;
-                                done = true;
+                                endOfStream();
                             }
                         }
                         else if (exists parent = node.parent,
                                  previous === parent) {
-                            // Coming from the parent node
+                            // Coming from the parent node -----------------
                             if (exists left = node.left) {
-                                // Proceed to left subtree
-                                node = left;
-                                if (node.terminal) {
-                                    done = true;
-                                }
+                                proceedTo(left);
                             }
                             else if (exists middle = node.middle) {
-                                // Proceed to middle subtree
                                 keyPrefix.add(node.element);
-                                print(">>>>> ``keyPrefix``");
-                                node = middle;
-                                if (node.terminal) {
-                                    done = true;
-                                }
+                                proceedTo(middle);
                             }
                             else if (exists right = node.right) {
-                                // Proceed to right subtree
-                                node = right;
-                                if (node.terminal) {
-                                    done = true;
-                                }
+                                proceedTo(right);
                             }
                             else {
-                                // Backtrack to the parent node
-                                node = parent;
+                                backtrackTo(parent);
                             }
                         }
                         else {
@@ -297,37 +278,21 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                         }
                     }
                     else {
-                        // Got here because there was no previous node.
-                        // This must be the very first call to `next()`.
-                        // Well, henceforth there will be a previous node.  
+                        // Got here because there was no previous node,
+                        // so this must be the very first call to `next()`.
                         previousNode = node;
                         if (exists middle = node.middle) {
-                            // Proceed to middle subtree
                             keyPrefix.add(node.element);
-                            print(">>>>> ``keyPrefix``");
-                            node = middle;
-                            if (node.terminal) {
-                                done = true;
-                            }
+                            proceedTo(middle);
                         }
                         else if (exists right = node.right) {
-                            // Proceed to right subtree
-                            node = right;
-                            if (node.terminal) {
-                                done = true;
-                            }
+                            proceedTo(right);
                         }
                         else if (exists parent = node.parent) {
-                            // Backtrack to parent
-                            node = parent;
-                            if (node.terminal) {
-                                done = true;
-                            }
+                            backtrackTo(parent);
                         }
                         else {
-                            // End of stream
-                            currentNode = null;    
-                            done = true;
+                            endOfStream();
                         }
                     }
                 }
@@ -341,27 +306,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
             else {
                 return finished;
             }
-            
-        }
-    }
-
-    Boolean parentsTurn(Node node, 
-                        Node parent, 
-                        MutableList<KeyElement> keyPrefix) {
-        if (exists middleSibling = parent.middle, middleSibling === node) {
-            keyPrefix.deleteLast();
-            print(">>>>> ``keyPrefix``");
-            return parent.terminal;
-        }
-        else if (!parent.terminal) {
-            return false;
-        }
-        else if (!parent.middle exists, 
-                 exists rightSibling = parent.right, rightSibling === node) {
-            return true;
-        }
-        else {
-            return false;
         }
     }
 
@@ -377,120 +321,92 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 // but must update the iterator state before returning
                 variable Node node = current;  
                 variable Boolean done = false;
+                void proceedTo(Node n) {
+                    node = n;
+                    if (node.terminal && !node.right exists 
+                                      && !node.middle exists) {
+                        done = true;
+                    }
+                }
+                void backtrackTo(Node parent) {
+                    if (exists middleSibling = parent.middle, 
+                               middleSibling === node) {
+                        keyPrefix.deleteLast();
+                        if (parent.terminal) {
+                            done = true;
+                        }
+                    }
+                    else if (parent.terminal,
+                             !parent.middle exists, 
+                             exists rightSibling = parent.right,
+                             rightSibling === node) {
+                        done= true;
+                    }
+                    node = parent;
+                }
+                void endOfStream() {
+                    currentNode = null;
+                    done = true;
+                }
                 // Leaves the loop below with `node` containing the next
                 // terminal `Node` to visit or with `currentNode` set to null 
                 while (!done) {
-                    print(">>> ``node``");
                     if (exists previous = previousNode) {
                         previousNode = node;
                         if (exists right = node.right, previous === right) {
-                            // Backtracking from right subtree
+                            // Backtracking from right subtree -------------
                             if (exists middle = node.middle) {
-                                // Proceed to middle subtree
                                 keyPrefix.add(node.element);
-                                print(">>>>> ``keyPrefix``");
-                                node = middle;
-                                if (node.terminal && !node.right exists 
-                                                  && !node.middle exists) {
-                                    done = true;
-                                }
+                                proceedTo(middle);
                             }
                             else if (exists left = node.left) {
-                                // Proceed to left subtree
-                                node = left;
-                                if (node.terminal && !node.right exists 
-                                                  && !node.middle exists) {
-                                    done = true;
-                                }
+                                proceedTo(left);
                             }
                             else if (exists parent = node.parent) {
-                                // Backtrack to parent node
-                                if (parentsTurn(node, parent, keyPrefix)) {
-                                    done = true;
-                                }
-                                node = parent;
+                                backtrackTo(parent);
                             }
                             else {
-                                // End of stream
-                                currentNode = null;
-                                done = true;
+                                endOfStream();
                             }
                         }
                         else if (exists middle = node.middle,
                                  previous === middle) {
-                            // Backtracking from middle subtree
+                            // Backtracking from middle subtree ------------
                             if (exists left = node.left) {
-                                // Proceed to left subtree
-                                node = left;
-                                if (node.terminal && !node.right exists 
-                                                  && !node.middle exists) {
-                                    done = true;
-                                }
+                                proceedTo(left);
                             }
                             else if (exists parent = node.parent) {
-                                // Backtrack to parent node
-                                if (parentsTurn(node, parent, keyPrefix)) {
-                                    done = true;
-                                }
-                                node = parent;
+                                backtrackTo(parent);
                             }
                             else {
-                                // End of stream
-                                currentNode = null;
-                                done = true;
+                                endOfStream();
                             }
                         }
                         else if (exists left = node.left,
                                  previous === left) {
-                            // Backtracking from left subtree 
+                            // Backtracking from left subtree --------------
                             if (exists parent = node.parent) {
-                                // Backtrack to parent node
-                                if (parentsTurn(node, parent, keyPrefix)) {
-                                    done = true;
-                                }
-                                node = parent;
+                                backtrackTo(parent);
                             }
                             else {
-                                // End of stream
-                                currentNode = null;
-                                done = true;
+                                endOfStream();
                             }
                         }
                         else if (exists parent = node.parent,
                                  previous === parent) {
-                            // Coming from the parent node
+                            // Coming from the parent node -----------------
                             if (exists right = node.right) {
-                                // Proceed to right subtree
-                                node = right;
-                                if (node.terminal && !node.right exists 
-                                                  && !node.middle exists) {
-                                    done = true;
-                                }
+                                proceedTo(right);
                             }
                             else if (exists middle = node.middle) {
-                                // Proceed to middle subtree
                                 keyPrefix.add(node.element);
-                                print(">>>>> ``keyPrefix``");
-                                node = middle;
-                                if (node.terminal && !node.right exists 
-                                                  && !node.middle exists) {
-                                    done = true;
-                                }
+                                proceedTo(middle);
                             }
                             else if (exists left = node.left) {
-                                // Proceed to left subtree
-                                node = left;
-                                if (node.terminal && !node.right exists 
-                                                  && !node.middle exists) {
-                                    done = true;
-                                }
+                                proceedTo(left);
                             }
                             else {
-                                // Backtrack to parent node
-                                if (parentsTurn(node, parent, keyPrefix)) {
-                                    done = true;
-                                }
-                                node = parent;
+                                backtrackTo(parent);
                             }
                         }
                         else {
@@ -503,39 +419,21 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                         }
                     }
                     else {
-                        // Got here because there was no previous node.
-                        // This must be the very first call to `next()`.
-                        // Well, henceforth there will be a previous node.  
+                        // Got here because there was no previous node,
+                        // so this must be the very first call to `next()`.
                         previousNode = node;
                         if (exists middle = node.middle) {
-                            // Proceed to middle subtree
                             keyPrefix.add(node.element);
-                            print(">>>>> ``keyPrefix``");
-                            node = middle;
-                            if (node.terminal && !node.right exists 
-                                              && !node.middle exists) {
-                                done = true;
-                            }
+                            proceedTo(middle);
                         }
                         else if (exists left = node.left) {
-                            // Proceed to left subtree
-                            node = left;
-                            if (node.terminal && !node.right exists 
-                                              && !node.middle exists) {
-                                done = true;
-                            }
+                            proceedTo(left);
                         }
                         else if (exists parent = node.parent) {
-                            // Backtrack to parent
-                            if (parentsTurn(node, parent, keyPrefix)) {
-                                done = true;
-                            }
-                            node = parent;
+                            backtrackTo(parent);
                         }
                         else {
-                            // End of stream
-                            currentNode = null;    
-                            done = true;
+                            endOfStream();
                         }
                     }
                 }
@@ -658,49 +556,9 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
             => (super of Map<Key,Item>).hash;
 
 
-    // Returns the node with the largest element less than or equal to `e`,
-    // or null if all nodes have elements greater than `e`.  
-    Node? recBstFloor(KeyElement e, Node? node = root) {
-        if (exists node) {
-            switch (compare(node.element, e))
-            case (smaller) {
-                value t = recBstFloor(e, node.right);
-                return if (exists t) then t else node;
-            }        
-            case (equal) {
-                return node;
-            }        
-            case (larger) {
-                return recBstFloor(e, node.left);
-            }        
-        }
-        else {
-            return null;
-        }
-    }
-    
-    // Returns the node with the largest element less than or equal to `e`,
-    // or null if all nodes have elements greater than `e`.  
-    Node? recBstFloor2(KeyElement e, Node? bestSoFar, Node? node /* = root */) {
-        if (exists node) {
-            switch (compare(node.element, e))
-            case (smaller) {
-                return recBstFloor2(e, node, node.right);
-            }        
-            case (equal) {
-                return node;
-            }        
-            case (larger) {
-                return recBstFloor2(e, null, node.left);
-            }        
-        }
-        else {
-            return bestSoFar;
-        }
-    }
-    
-    // Returns the node with the largest element less than or equal to `e`,
-    // or null if all nodes have elements greater than `e`.  
+    "Returns the node with the largest element less than or equal to `e`
+     within the _binary_ subtree rooted at the given `node`, or null if 
+     all the nodes of that subtree have elements greater than `e`."
     Node? bstFloor(KeyElement e, Node? node = root) {
         variable Node? currentNode = node;
         variable Node? bestSoFar = null;
@@ -720,8 +578,9 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         return bestSoFar;
     }
     
-    // Returns the node with the largest element less than or equal to `e`,
-    // or null if all nodes have elements greater than `e`.  
+    // Returns the node with the largest element less than `e` within the
+    // _binary_ subtree rooted at the given `node`, or null if all nodes
+    // of that subtree have elements greater than or equal to `e`.  
     Node? bstStrictFloor(KeyElement e, Node? node = root) {
         variable Node? currentNode = node;
         variable Node? bestSoFar = null;
@@ -737,18 +596,62 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         return bestSoFar;
     }
     
-    // Returns the terminal node with the largest key less than or equal to `key`,
-    // or null if all terminal nodes have keys greater than `key`.  
-    Node? recFloor(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
+    "Returns the node with the smallest element greater than or equal
+     to  `e` within the _binary_ subtree rooted at the given `node`, or
+     null if all the nodes of that subtree have elements less than `e`."  
+    Node? bstCeiling(KeyElement e, Node? node = root) {
+        variable Node? currentNode = node;
+        variable Node? bestSoFar = null;
+        while (exists n = currentNode) {
+            switch (compare(n.element, e))
+            case (smaller) {
+                currentNode = n.right;
+            }        
+            case (equal) {
+                return n;
+            }        
+            case (larger) {
+                bestSoFar = n;
+                currentNode = n.left;
+            }        
+        }
+        return bestSoFar;
+    }
+    
+    "Returns the node with the smallest element greater than `e` within
+     the _binary_ subtree rooted at the given `node`, or null if all the
+     nodes of that subtree have elements less than or equal to `e`."
+    Node? bstStrictCeiling(KeyElement e, Node? node = root) {
+        variable Node? currentNode = node;
+        variable Node? bestSoFar = null;
+        while (exists n = currentNode) {
+            if ((compare(n.element, e)) == larger) {
+                bestSoFar = n;
+                currentNode = n.left;
+            }
+            else {        
+                currentNode = n.right;
+            }        
+        }
+        return bestSoFar;
+    }
+    
+    "Returns the terminal node with the largest key less than or equal to
+     `key` within the ternary subtree rooted at the given `node`, or null
+     if all the terminal nodes of that subtree have keys greater than `key`."  
+    Node? recFloor(Key key, 
+                   MutableList<KeyElement> keyAccumulator, 
+                   Node? node) {
         if (exists cur = bstFloor(key.first, node)) {
             switch (compare (cur.element, key.first))
             case (smaller) {
-                return lastTerminalNode(keyAccumulator, cur);
+                keyAccumulator.add(cur.element);
+                return (if (cur.terminal) then cur
+                        else lastTerminalNode(keyAccumulator, cur.middle));
             }        
             case (equal) {
                 if (nonempty rest = key.rest) {
                     keyAccumulator.add(cur.element);
-                    print("==============================> added ``cur.element``  at ``cur``");
                     if (exists middle = cur.middle) {
                         value t = recFloor(rest, keyAccumulator, middle);
                         if (t exists) {
@@ -759,11 +662,20 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                         }
                         else {
                             keyAccumulator.deleteLast();
-                            print("==============================> removed last at ``cur``");
-                            if (exists alternative = bstStrictFloor(key.first, node)) {
-                                return (if (alternative === cur) 
-                                        then null
-                                        else lastTerminalNode(keyAccumulator, alternative));
+                            if (exists alt = bstStrictFloor(key.first, node)) {
+                                if (alt === cur) {
+                                    return null;
+                                }
+                                else {
+                                    keyAccumulator.add(alt.element);
+                                    if (alt.terminal) { 
+                                        return alt; 
+                                    }
+                                    else {
+                                        return lastTerminalNode(keyAccumulator,
+                                                                alt);
+                                    }
+                                }
                             }
                             else {
                                 return null;
@@ -778,17 +690,26 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 else {
                     if (cur.terminal) {
                         keyAccumulator.add(cur.element);
-                        print("==============================> added ``cur.element`` at ``cur``");
                         return cur;
                     }
                     else {
                         // `key` is a proper prefix of the key in the
-                        // tree path, so all keys further down in this 
+                        // tree path, so all keys further down along this 
                         // path are greater (longer) than `key`
-                        if (exists alternative = bstStrictFloor(key.first, node)) {
-                            return (if (alternative === cur)
-                                    then null
-                                    else lastTerminalNode(keyAccumulator, alternative));
+                        if (exists alt = bstStrictFloor(key.first, node)) {
+                            if (alt === cur) {
+                                return null;
+                            }
+                            else {
+                                keyAccumulator.add(alt.element);
+                                if (alt.terminal) { 
+                                    return alt; 
+                                }
+                                else {
+                                    return lastTerminalNode(keyAccumulator,
+                                                            alt);
+                                }
+                            }
                         }
                         else {
                             return null;
@@ -804,16 +725,90 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         else {
             return null;
         }
-        //return null;
     }
 
-
+    "Returns the terminal node with the smallest key greater than or equal to
+     `key` within the ternary subtree rooted at the given `node`, or null
+     if all the terminal nodes of that subtree have keys less than `key`."  
+    Node? recCeiling(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
+        if (exists cur = bstCeiling(key.first, node)) {
+            switch (compare (cur.element, key.first))
+            case (larger) {
+                return firstTerminalNode(keyAccumulator, cur); // NOT RIGHT???!!
+            }        
+            case (equal) {
+                if (nonempty rest = key.rest) {
+                    keyAccumulator.add(cur.element);
+                    //print("==============================> added ``cur.element``  at ``cur``");
+                    if (exists middle = cur.middle) {
+                        value t = recCeiling(rest, keyAccumulator, middle);
+                        if (t exists) {
+                            return t;
+                        }
+                        //else if (cur.terminal) {
+                        //    return cur;
+                        //}
+                        else {
+                            keyAccumulator.deleteLast();
+                            //print("==============================> removed last at ``cur``");
+                            if (exists alternative = bstStrictCeiling(key.first, node)) {
+                                return (if (alternative === cur) 
+                                        then null
+                                        else firstTerminalNode(keyAccumulator, alternative));
+                            }
+                            else {
+                                return null;
+                            }
+                        }
+                    }
+                    else {
+                        //assert(cur.terminal);
+                        //return cur;
+                        return null;
+                    }
+                }
+                //  TODO: finish this method        <<-------------------
+                else {
+                    if (cur.terminal) {
+                        keyAccumulator.add(cur.element);
+                        //print("==============================> added ``cur.element`` at ``cur``");
+                        return cur;
+                    }
+                    else {
+                        // `key` is a proper prefix of the key in this tree 
+                        // path, so all keys further down along the path
+                        // are greater (longer) than `key`. 
+                        // Just return the smallest one. 
+                        return firstTerminalNode(keyAccumulator, cur);
+                    }
+                }
+            }        
+            case (smaller) {     // << ja' mudei isto
+                "cannot happen"
+                assert(false);
+            }        
+        }
+        else {
+            return null;
+        }
+    }
     
-    // begin TODO section
-        
-    shared actual {<Key->Item>*} ascendingEntries(Key from, Key to) => nothing;
-    
-    shared actual {<Key->Item>*} descendingEntries(Key from, Key to) => nothing;
+    // lexicographically compare two keys
+    shared Comparison compareKeys(Key key1, Key key2){
+        variable Comparison result = compare(key1.first, key2.first);
+        variable Key k1 = key1;
+        variable Key k2 = key2;
+        while (result != equal, 
+               nonempty r1 = k1.rest, 
+               nonempty r2 = k2.rest) {
+            k1 = r1;
+            k2 = r2;
+        }
+        return (if (result != equal)  then result 
+                else if (k2.rest nonempty) then smaller
+                else if (k1.rest nonempty) then larger
+                else equal);
+    }
     
     shared actual {<Key->Item>*} higherEntries(Key key)
             => object satisfies {<Key->Item>*} {
@@ -825,7 +820,6 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 iterator() => EntryIterator(keyAccumulator, node);
             };
     
-    
     shared actual {<Key->Item>*} lowerEntries(Key key)
             => object satisfies {<Key->Item>*} {
                 value keyAccumulator = ArrayList<KeyElement>();
@@ -833,30 +827,36 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                 if (node exists) {
                     keyAccumulator.deleteLast();
                 }
-                print("--> ``keyAccumulator``");
+                //print("--> ``keyAccumulator``");
                 iterator() => ReverseEntryIterator(keyAccumulator, node);
             };
     
     
-    shared actual PrefixMap<KeyElement,Item> measure(Key from, Integer length) => nothing;
+    shared actual {<Key->Item>*} ascendingEntries(Key from, Key to)
+            => higherEntries(from).takeWhile((entry)
+                => compareKeys(entry.key,to)!=larger);
     
-    shared actual PrefixMap<KeyElement,Item> span(Key from, Key to) => nothing;
     
-    shared actual PrefixMap<KeyElement,Item> spanFrom(Key from) => nothing;
+    shared actual {<Key->Item>*} descendingEntries(Key from, Key to)
+            => lowerEntries(from).takeWhile((entry) 
+                => compareKeys(entry.key,to)!=smaller);
     
-    shared actual PrefixMap<KeyElement,Item> spanTo(Key to) => nothing;
+    //shared actual formal AbstractTernaryTree<KeyElement,Item> measure(Key from, Integer length);
     
-    // end TODO section
+    //shared actual formal AbstractTernaryTree<KeyElement,Item> span(Key from, Key to);
+    
+    //shared actual formal AbstractTernaryTree<KeyElement,Item> spanFrom(Key from);
+    
+    //shared actual formal AbstractTernaryTree<KeyElement,Item> spanTo(Key to);
     
     void printSubtree(Node? n) {
         if (exists n) {
             print(n);
             printSubtree(n.left);
-            printSubtree(n.middle);
+            //printSubtree(n.middle);
             printSubtree(n.right);
         }
     }
-    
     "Prints a series of lines to the standart output of the virtual machine
      process, with one line per node of this tree. Each line has the format
      ~~~Text
