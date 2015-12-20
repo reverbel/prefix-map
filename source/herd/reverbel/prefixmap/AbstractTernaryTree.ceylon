@@ -121,6 +121,13 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                then lookup(key) exists 
                else keys.any(key.equals);
 
+    "Returns the terminal node that corresponds to the first entry (in
+     lexicographic order) within the subtree rooted at the given `root`,
+     or null if that subtree is empty (i.e., if `root` does not exist).
+     Whenever this method returns a terminal node, it also adds to the
+     list `key` the sequence of key elements that forms the key in the
+     corresponding entry. If this method returns null, it leaves the
+     list `key` unchanged." 
     Node? firstTerminalNode(MutableList<KeyElement> key, Node? root) {
         if (exists node = root) {
             variable Node current = node;
@@ -145,6 +152,13 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         }
     }
     
+    "Returns the terminal node that corresponds to the last entry (in
+     lexicographic order) within the subtree rooted at the given `root`,
+     or null if that subtree is empty (i.e., if `root` does not exist).
+     Whenever this method returns a terminal node, it also adds to the
+     list `key` the sequence of key elements that forms the key in the
+     corresponding entry. If this method returns null, it leaves the
+     list `key` unchanged."  
     Node? lastTerminalNode(MutableList<KeyElement> key, Node? root) {
         if (exists node = root) {
             variable Node current = node;
@@ -168,7 +182,11 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
             return null;
         }
     }
-    
+
+    "Receives in `keyPrefix` a (possibly empty) list of key elements with
+     all but the last element of a key and in `terminalNode` the terminal
+     node that contains both the last element of that key and the 
+     corresponding item. Returns an `Entry` with the key and the item."
     Key->Item entry(MutableList<KeyElement> keyPrefix, Node terminalNode) {
         assert (terminalNode.terminal);
         assert (is Item item = terminalNode.item);
@@ -639,21 +657,19 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     "Returns the terminal node with the largest key less than or equal to
      `key` within the ternary subtree rooted at the given `node`, or null
      if all the terminal nodes of that subtree have keys greater than `key`."  
-    Node? recFloor(Key key, 
-                   MutableList<KeyElement> keyAccumulator, 
-                   Node? node) {
+    Node? floor(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
         if (exists cur = bstFloor(key.first, node)) {
             switch (compare (cur.element, key.first))
             case (smaller) {
                 keyAccumulator.add(cur.element);
-                return (if (cur.terminal) then cur
-                        else lastTerminalNode(keyAccumulator, cur.middle));
+                return if (cur.terminal) then cur
+                       else lastTerminalNode(keyAccumulator, cur.middle);
             }        
             case (equal) {
                 if (nonempty rest = key.rest) {
                     keyAccumulator.add(cur.element);
                     if (exists middle = cur.middle) {
-                        value t = recFloor(rest, keyAccumulator, middle);
+                        value t = floor(rest, keyAccumulator, middle);
                         if (t exists) {
                             return t;
                         }
@@ -661,6 +677,8 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                              return cur;
                         }
                         else {
+                            // the element in node `cur` is too large,
+                            // try an alternative node with a smaller element   
                             keyAccumulator.deleteLast();
                             if (exists alt = bstStrictFloor(key.first, node)) {
                                 if (alt === cur) {
@@ -668,13 +686,9 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                                 }
                                 else {
                                     keyAccumulator.add(alt.element);
-                                    if (alt.terminal) { 
-                                        return alt; 
-                                    }
-                                    else {
-                                        return lastTerminalNode(keyAccumulator,
-                                                                alt);
-                                    }
+                                    return if (alt.terminal) then alt 
+                                           else lastTerminalNode(keyAccumulator, 
+                                                                  alt);
                                 }
                             }
                             else {
@@ -687,15 +701,16 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                         return cur;
                     }
                 }
-                else {
+                else { // key.rest is empty
                     if (cur.terminal) {
                         keyAccumulator.add(cur.element);
                         return cur;
                     }
                     else {
-                        // `key` is a proper prefix of the key in the
-                        // tree path, so all keys further down along this 
-                        // path are greater (longer) than `key`
+                        // `key` is a proper prefix of the key in this
+                        // tree path, so all keys further down along any
+                        // continuation of this path are greater (longer) 
+                        // than `key`. Try an alternative path.
                         if (exists alt = bstStrictFloor(key.first, node)) {
                             if (alt === cur) {
                                 return null;
@@ -730,31 +745,30 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     "Returns the terminal node with the smallest key greater than or equal to
      `key` within the ternary subtree rooted at the given `node`, or null
      if all the terminal nodes of that subtree have keys less than `key`."  
-    Node? recCeiling(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
+    Node? ceiling(Key key, 
+                  MutableList<KeyElement> keyAccumulator, Node? node) {
         if (exists cur = bstCeiling(key.first, node)) {
             switch (compare (cur.element, key.first))
             case (larger) {
-                return firstTerminalNode(keyAccumulator, cur); // NOT RIGHT???!!
+                return firstTerminalNode(keyAccumulator, cur);
             }        
             case (equal) {
                 if (nonempty rest = key.rest) {
                     keyAccumulator.add(cur.element);
-                    //print("==============================> added ``cur.element``  at ``cur``");
                     if (exists middle = cur.middle) {
-                        value t = recCeiling(rest, keyAccumulator, middle);
+                        value t = ceiling(rest, keyAccumulator, middle);
                         if (t exists) {
                             return t;
                         }
-                        //else if (cur.terminal) {
-                        //    return cur;
-                        //}
                         else {
+                            // the element in node `cur` is too small,
+                            // try an alternative node with a larger element   
                             keyAccumulator.deleteLast();
-                            //print("==============================> removed last at ``cur``");
-                            if (exists alternative = bstStrictCeiling(key.first, node)) {
-                                return (if (alternative === cur) 
-                                        then null
-                                        else firstTerminalNode(keyAccumulator, alternative));
+                            if (exists alt = bstStrictCeiling(key.first, 
+                                                              node)) {
+                                return if (alt === cur) then null
+                                       else firstTerminalNode(keyAccumulator,
+                                                              alt);
                             }
                             else {
                                 return null;
@@ -762,28 +776,32 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
                         }
                     }
                     else {
-                        //assert(cur.terminal);
-                        //return cur;
-                        return null;
+                        // the element in node `cur` is too small,
+                        // try an alternative node with a larger element   
+                        if (exists alt = bstStrictCeiling(key.first, node)) {
+                            return if (alt === cur) then null
+                                   else firstTerminalNode(keyAccumulator, alt);
+                        }
+                        else {
+                            return null;
+                        }
                     }
                 }
-                //  TODO: finish this method        <<-------------------
-                else {
+                else { // key.rest is empty
                     if (cur.terminal) {
                         keyAccumulator.add(cur.element);
-                        //print("==============================> added ``cur.element`` at ``cur``");
                         return cur;
                     }
                     else {
-                        // `key` is a proper prefix of the key in this tree 
-                        // path, so all keys further down along the path
-                        // are greater (longer) than `key`. 
-                        // Just return the smallest one. 
+                        // `key` is a proper prefix of the key in this 
+                        // tree path, so all keys further down along any 
+                        // continuation of this path are greater (longer)
+                        // than `key`. Return the smallest one. 
                         return firstTerminalNode(keyAccumulator, cur);
                     }
                 }
             }        
-            case (smaller) {     // << ja' mudei isto
+            case (smaller) {
                 "cannot happen"
                 assert(false);
             }        
@@ -813,7 +831,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     shared actual {<Key->Item>*} higherEntries(Key key)
             => object satisfies {<Key->Item>*} {
                 value keyAccumulator = ArrayList<KeyElement>();
-                value node = recFloor(key, keyAccumulator, root); /* TODO: SHOULD BE CEILING!!! */
+                value node = ceiling(key, keyAccumulator, root);
                 if (node exists) {
                     keyAccumulator.deleteLast();
                 }
@@ -823,7 +841,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
     shared actual {<Key->Item>*} lowerEntries(Key key)
             => object satisfies {<Key->Item>*} {
                 value keyAccumulator = ArrayList<KeyElement>();
-                value node = recFloor(key, keyAccumulator, root);
+                value node = floor(key, keyAccumulator, root);
                 if (node exists) {
                     keyAccumulator.deleteLast();
                 }
