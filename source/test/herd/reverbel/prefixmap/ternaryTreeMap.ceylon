@@ -288,6 +288,7 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
             while (exists word = reader.readLine()) {
                 map.put(toSequence(word), word.size);
             }
+            print("``map.size`` entries");
             for (entry in map) {
                 writer.writeLine(toString(entry.key));  
             }
