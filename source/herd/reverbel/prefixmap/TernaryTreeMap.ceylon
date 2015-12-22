@@ -150,21 +150,21 @@ shared class TernaryTreeMap<KeyElement, Item>
     
     // End of initializer section
     
-    shared actual Node? search(Key key, Node? node) {
+    Node? recursiveSearch(Key key, Node? node) {
         if (!exists node) {
             return null; 
         }
         else { 
             switch (compare(key.first, node.element))
             case (smaller) { 
-                return search(key, node.left); 
+                return recursiveSearch(key, node.left); 
             } 
             case (larger) {
-                return search(key, node.right); 
+                return recursiveSearch(key, node.right); 
             }
             case (equal) {
                 if (nonempty rest = key.rest) {
-                    return search(rest, node.middle); 
+                    return recursiveSearch(rest, node.middle); 
                 }
                 else {
                     // the last element of `key` matched the one in `node`
@@ -174,7 +174,9 @@ shared class TernaryTreeMap<KeyElement, Item>
         }
     }
     
-   
+    shared actual Node? search(Key key)
+            => recursiveSearch(key, root);
+    
    /*
     //Iterative version of lookup
     Node? lookup(Key key, Node? startingNode = root) {

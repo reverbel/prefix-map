@@ -286,29 +286,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     
     // End of initializer section
     
-    shared actual Node? search(Key key, Node? node) {
-        if (!exists node) {
-            return null; 
-        }
-        else { 
-            switch (compare(key.first, node.element))
-            case (smaller) { 
-                return search(key, node.left); 
-            } 
-            case (larger) {
-                return search(key, node.right); 
-            }
-            case (equal) {
-                if (nonempty rest = key.rest) {
-                    return search(rest, node.middle); 
-                }
-                else {
-                    // the last element of `key` matched the one in `node`
-                    return node;
-                }
-            }
-        }
-    }
+    shared actual Node? search(Key key) => nothing;
     
     Boolean leaf(Node n)
             => !(n.left exists) && !(n.middle exists) && !(n.right exists);
@@ -472,8 +450,6 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     //shared actual Item? put(Key key, Item item) => nothing;
     
     //shared actual Item? remove(Key key) => nothing;
-    
-    //shared actual Node? search(Key key, Node? node) => nothing;
     
      
 }

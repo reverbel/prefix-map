@@ -161,14 +161,19 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
 
     //shared actual formal Item? remove(Key key);
     
-    "Searches for the given `key` in the subtree rooted at the given `node`.
-     Returns either the node containing the last element of `key` and the
-     `Item` associated with `key`, or null if `key` is not present in this
-     tree."
-    shared formal Node? search(Key key, Node? node);
+    "Searches for a `key` in this ternary tree. Returns either the last node 
+     of a middle path with the sequence of elements of the given `key`, or 
+     null if there is no such middle path. A node returned by `search` is 
+     not necessarily terminal. If `tree.search(key)` returns a terminal
+     node, then the given `key` is actually present in the tree, and the 
+     returned node contains the item associated with that key. If 
+     `tree.search(key)` returns a non-terminal node, then the given `key`
+     appears only as a prefix of some key in the tree, and there is no 
+     item associated with `key`."
+    shared formal Node? search(Key key);
     
-    Node? lookup(Key key, Node? startingNode = root)
-            => let (node = search(key, startingNode))
+    Node? lookup(Key key)
+            => let (node = search(key))
                if (exists node, node.terminal) then node else null; 
     
     shared actual Item? get(Object key)
@@ -595,18 +600,15 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         return queue.iterator();
     }
     
-    Node? subtree(Key prefix) 
-            => search(prefix, root); 
-    
     shared actual Boolean hasKeyWithPrefix(Object prefix)
-            => if (is Key prefix) then (subtree(prefix) exists) else false;
+            => if (is Key prefix) then (search(prefix) exists) else false;
     
     
     shared actual {Key*} keysWithPrefix(Object prefix)
             => entriesWithPrefix(prefix).map(Entry.key);
     
     shared actual {<Key->Item>*} entriesWithPrefix(Object prefix) {
-        if (is Key prefix, exists node = subtree(prefix)) {
+        if (is Key prefix, exists node = search(prefix)) {
             value queue = ArrayList<Key->Item>();
             if (node.terminal) {
                 assert (is Item i = node.item);
