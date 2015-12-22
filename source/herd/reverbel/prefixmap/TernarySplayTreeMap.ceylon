@@ -225,21 +225,13 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     }
     
     shared actual Item? put(Key key, Item item) {
-        //print("begin put(``key``, ``item?.string else "<null>"``) -----------");
         if (root exists) {
             value outBox = SplayOutputBox(key); 
-            //print("before splay:");
-            //printNodes2();
             splay(key, outBox);
-            //print("after splay:");
-            //printNodes2();
-            //print("-----------------------------------");
             if (nonempty keySuffix = outBox.remainingKeyElements) {
-                //print(keySuffix);
                 Node newSubtree = newVerticalPath(null, keySuffix, item);
                 Node curNode;
                 if (exists node = outBox.lastMatchingNode) {
-                    //print("lastMatchingNode: ``node``");
                     if (exists m = node.middle) {
                         curNode = m;
                     }
@@ -255,7 +247,6 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 }
                 switch (compare(keySuffix.first, curNode.element))
                 case (smaller) {
-                    //print("smaller >>> curNode: ``curNode``");
                     newSubtree.left = curNode.left;
                     if (exists n = curNode.left) {
                         n.parent = newSubtree;
@@ -265,7 +256,6 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     curNode.left = null;
                 }
                 case (larger) {
-                    //print("larger >>> curNode: ``curNode``");
                     newSubtree.right = curNode.right;
                     if (exists n = curNode.right) {
                         n.parent = newSubtree;
