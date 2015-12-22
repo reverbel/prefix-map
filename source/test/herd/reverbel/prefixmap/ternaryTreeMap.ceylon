@@ -1,4 +1,4 @@
-import herd.reverbel.prefixmap { TernaryTreeMap }
+import herd.reverbel.prefixmap { TernaryTreeMap, TernarySplayTreeMap }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
 import ceylon.file { ... }
@@ -245,4 +245,18 @@ shared test void testWithFullDictionary() {
         print("input file does not exist");
     }
     
+    
+}
+
+shared test void testTernarySplayTreeMap() {
+    value map = TernarySplayTreeMap<Character, Integer>();
+    variable Integer? n;
+    
+    value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
+    for (str in strings) {
+        n = map.put(toSequence(str), str.size);
+        print(n);
+        print(map);
+        map.printNodes();
+    }
 }
