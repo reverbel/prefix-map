@@ -933,7 +933,7 @@ shared abstract class AbstractTernaryTree<KeyElement, Item>()
         if (exists n) {
             print(n);
             printSubtree(n.left);
-            //printSubtree(n.middle);
+            printSubtree(n.middle);
             printSubtree(n.right);
         }
     }
