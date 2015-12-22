@@ -221,31 +221,11 @@ shared test void testWithFullDictionary() {
                     writer2.writeLine(toString(entry.key));  
                 }
             }
-            
-            //for (str in ["B", "C", "i", "r"]) {
-            //    value item = map.get(toSequence(str));
-            //    if (exists item) {
-            //        print("``str`` -> ``item``");
-            //    }
-            //}
-            //for (key in map.keys) {
-            //    if (toString(key) == "B") {
-            //        print("Found key B!");
-            //    }
-            //}
-            //value it = map.eagerIterator();
-            //while (!is Finished entry = it.next()) {
-            //    if (toString(entry.key) == "B") {
-            //        print("Found key B!");
-            //    }
-            //}
         }
     }
     else {
         print("input file does not exist");
     }
-    
-    
 }
 
 shared test void testTernarySplayTreeMap() {
@@ -258,5 +238,67 @@ shared test void testTernarySplayTreeMap() {
         print(n);
         print(map);
         map.printNodes();
+    }
+    map.clear();
+    value moreStrings = {"regret", "ultra's", "insinuating", "Charlotte's", "stakeouts"};
+    for (str in moreStrings) {
+        n = map.put(toSequence(str), str.size);
+        //print(n);
+        //print(map);
+        //map.printNodes();
+    }
+    print("-----------------------------------------------------");
+    map.printNodes();
+    print("-----------------------------------------------------");
+    map.clear();
+    value yetMoreStrings = {"escapade", "es"};
+    for (str in yetMoreStrings) {
+        n = map.put(toSequence(str), str.size);
+        print(map);
+        map.printNodes();
+    }
+}
+
+shared test void testTernarySplayTreeMapWithFullDictionary() {
+    //value inputFilePath = parsePath("/usr/share/dict/american-english");
+    value inputFilePath = parsePath("/home/reverbel/american-english.shuffled");
+    if (is File inputFile = inputFilePath.resource) {
+        value outputFilePath = home.childPath("american-english.splay-tree-iterated");
+        value toDelete = outputFilePath.resource;
+        if (is ExistingResource toDelete) {
+            toDelete.delete();
+        }
+        value loc = outputFilePath.resource;
+        assert (is Nil loc);
+        value outputFile = loc.createFile();
+        
+        value outputFilePath2 = home.childPath("american-english.splay-tree-reverse-iterated");
+        value toDelete2 = outputFilePath2.resource;
+        if (is ExistingResource toDelete2) {
+            toDelete2.delete();
+        }
+        value loc2 = outputFilePath2.resource;
+        assert (is Nil loc2);
+        value outputFile2 = loc2.createFile();
+        
+        
+        try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
+            writer2 = outputFile2.Overwriter()) {
+            value map = TernarySplayTreeMap<Character, Integer>();
+            while (exists word = reader.readLine()) {
+                map.put(toSequence(word), word.size);
+            }
+            for (entry in map) {
+                writer.writeLine(toString(entry.key));  
+            }
+            if (exists last = map.last) {
+                for (entry in map.lowerEntries(last.key)) {
+                    writer2.writeLine(toString(entry.key));  
+                }
+            }
+        }
+    }
+    else {
+        print("input file does not exist");
     }
 }

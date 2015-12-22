@@ -46,39 +46,36 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
 
-   class SplayOutputBox(Key key) {
+    class SplayOutputBox(Key key) {
         shared variable Node? lastMatchingNode = null;
         shared variable KeyElement[] remainingKeyElements = key;
-   }
+    }
     
     void splay(Key key, SplayOutputBox? outputBox = null) {
         variable Node l;
         variable Node r; 
-        variable Node curNode; 
-        variable Node nextNode;
         variable Node? lastMatchingNode = null;
+        variable Key k = key;
+        variable KeyElement[] keyRest = key;
+        variable Boolean keyElementFound;
         if (!auxNode exists) {
             auxNode = Node(key.first);
         }
         assert (exists aux = auxNode);
         assert (exists rootNode = root);
-        curNode = rootNode;
-        variable Key k = key;
-        variable Boolean keyElementFound;
-        variable KeyElement[] keyRest = key;
+        variable Node curNode = rootNode; 
         while (true) {
-            aux.left = null;  
-            aux.right = null;
             l = aux;
             r = aux;
+            aux.left = null;  
+            aux.right = null;
             keyElementFound = false;
             while (true) {
                 switch (compare(k.first, curNode.element))
                 case (smaller) {
-                    if (exists curLeft = curNode.left) {
-                        if (compare(k.first, curLeft.element) == smaller) {
+                    if (exists nextNode = curNode.left) {
+                        if (compare(k.first, nextNode.element) == smaller) {
                             // rotate right
-                            nextNode = curLeft;
                             curNode.left = nextNode.right;
                             if (exists n = nextNode.right) {
                                 n.parent = curNode;
@@ -96,8 +93,8 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                         r.left = curNode;
                         curNode.parent = r;
                         r = curNode;
-                        curNode = curLeft;
-                        
+                        assert (exists leftChild = curNode.left);
+                        curNode = leftChild;
                     }
                     else {
                         break;
@@ -109,10 +106,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     break;
                 }
                 case (larger) {
-                    if (exists curRight = curNode.right) {
-                        if (compare(k.first, curRight.element) == larger) {      
+                    if (exists nextNode = curNode.right) {
+                        if (compare(k.first, nextNode.element) == larger) {      
                             // rotate left
-                            nextNode = curRight;
                             curNode.right = nextNode.left;
                             if (exists n = nextNode.left) {
                                 n.parent = curNode;
@@ -130,7 +126,8 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                         l.right = curNode;
                         curNode.parent = l;
                         l = curNode;
-                        curNode = curRight;
+                        assert (exists rightChild = curNode.right);
+                        curNode = rightChild;
                     }
                     else {
                         break;
@@ -163,6 +160,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 root = curNode;
                 curNode.parent = null;
             }
+            // bottom of inner loop
             if (keyElementFound) {
                 keyRest = k.rest;
                 lastMatchingNode = curNode;
@@ -205,7 +203,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         return head;
     }
     
-    void printSubtree(Node? n) {
+    shared void printSubtree(Node? n) {
         if (exists n) {
             print(n);
             printSubtree(n.left);
@@ -227,21 +225,21 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     }
     
     shared actual Item? put(Key key, Item item) {
-        print("begin put(``key``, ``item?.string else "<null>"``) -----------");
+        //print("begin put(``key``, ``item?.string else "<null>"``) -----------");
         if (root exists) {
             value outBox = SplayOutputBox(key); 
-            print("before splay:");
-            printNodes2();
+            //print("before splay:");
+            //printNodes2();
             splay(key, outBox);
-            print("after splay:");
-            printNodes2();
-            print("-----------------------------------");
+            //print("after splay:");
+            //printNodes2();
+            //print("-----------------------------------");
             if (nonempty keySuffix = outBox.remainingKeyElements) {
-                print(keySuffix);
+                //print(keySuffix);
                 Node newSubtree = newVerticalPath(null, keySuffix, item);
                 Node curNode;
                 if (exists node = outBox.lastMatchingNode) {
-                    print("lastMatchingNode: ``node``");
+                    //print("lastMatchingNode: ``node``");
                     if (exists m = node.middle) {
                         curNode = m;
                     }
@@ -257,7 +255,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 }
                 switch (compare(keySuffix.first, curNode.element))
                 case (smaller) {
-                    print("smaller >>> curNode: ``curNode``");
+                    //print("smaller >>> curNode: ``curNode``");
                     newSubtree.left = curNode.left;
                     if (exists n = curNode.left) {
                         n.parent = newSubtree;
@@ -267,7 +265,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     curNode.left = null;
                 }
                 case (larger) {
-                    print("larger >>> curNode: ``curNode``");
+                    //print("larger >>> curNode: ``curNode``");
                     newSubtree.right = curNode.right;
                     if (exists n = curNode.right) {
                         n.parent = newSubtree;
@@ -299,6 +297,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 }
                 else {
                     node.item = item;
+                    node.terminal = true;
                     return null;
                 }
             }
