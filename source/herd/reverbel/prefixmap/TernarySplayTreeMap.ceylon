@@ -294,8 +294,8 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         if (root exists) {
             value box = SplayOutputBox(key); 
             splay(key, box);
-            if (box.remainingKeyElements.empty 
-                    && box.lastMatchingNode exists) {
+            if (box.remainingKeyElements.empty) { 
+                //assert (box.lastMatchingNode exists);
                 return box.lastMatchingNode;  
             }
             else {
