@@ -1,21 +1,21 @@
 shared class TernarySplayTreeMap<KeyElement, Item> 
         extends AbstractTernaryTree<KeyElement, Item> 
         given KeyElement satisfies Comparable<KeyElement> {
-    
+
     "The root node of the tree."
     shared actual variable Node? root;
-    
+
     "The initial entries in the map."
     shared {<Key->Item>*} entries;
-    
+
     "Alternatively, the root node of a tree to clone."
     shared Node? nodeToClone;
-    
+
     "A comparator function used to sort the entries."
     shared actual Comparison(KeyElement, KeyElement) compare;
-    
+
     variable Node? auxNode = null;
-    
+
     "Create a new `TernarySplayTreeMap` with the given `entries` and
      the comparator function specified by the parameter `compare`." 
     shared new (
@@ -32,7 +32,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         nodeToClone = null;
         this.compare = compare;
     }
-    
+
     "Create a new `TernarySplayTreeMap` with the same entries and 
      comparator function as the given `TernarySplayTreeMap`."
     shared new copy(TernarySplayTreeMap<KeyElement,Item> abstractTernaryTree)
@@ -41,7 +41,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         nodeToClone = abstractTernaryTree.root;
         compare = abstractTernaryTree.compare;
     }
-    
+
     // initialization of root
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
@@ -50,7 +50,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         shared variable Node? lastMatchingNode = null;
         shared variable KeyElement[] remainingKeyElements = key;
     }
-    
+
     void splay(Key key, SplayOutputBox? outputBox = null) {
         variable Node l;
         variable Node r; 
@@ -99,7 +99,6 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     else {
                         break;
                     }
-                    
                 }
                 case (equal) {
                     keyElementFound = true;
@@ -132,7 +131,6 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     else {
                         break;
                     }
-                    
                 }
             }
             // assemble
@@ -181,7 +179,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             box.lastMatchingNode = lastMatchingNode;
         }
     }
-    
+
     Node newVerticalPath(Node? parent, Key key, Item item) {
         variable KeyElement e = key.first;
         variable KeyElement[] rest = key.rest;
@@ -202,7 +200,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         node.terminal = true;
         return head;
     }
-    
+
     shared actual Item? put(Key key, Item item) {
         if (root exists) {
             value outBox = SplayOutputBox(key); 
@@ -276,16 +274,16 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             return null;
         }
     }
-    
+
     //-------------------------------------------------------------------------
-    
+
     // Add initial entries
     for (key->item in entries) {
         put(key, item);
     }
-    
+
     // End of initializer section
-    
+
     shared actual Node? search(Key key) {
         if (root exists) {
             value box = SplayOutputBox(key); 
@@ -331,15 +329,14 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             }
         }
     }
-        
+
     shared actual Item? remove(Key key) {
         if (root exists) {
             value box = SplayOutputBox(key); 
             splay(key, box);
             if (box.remainingKeyElements.empty, 
-                exists node = box.lastMatchingNode,
-                node.terminal) {
-                
+                    exists node = box.lastMatchingNode,
+                    node.terminal) {
                 variable Node curNode = node;
                 assert (is Item theItem = node.item);
                 curNode.item = null;
@@ -405,13 +402,13 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             return null;
         }
     }
-        
+
     //-------------------------------------------------------------------------
-    
+
     shared actual TernarySplayTreeMap<KeyElement,Item> measure(Key from, 
                                                                Integer length)
             => TernarySplayTreeMap(higherEntries(from).take(length), compare);
-    
+
     shared actual TernarySplayTreeMap<KeyElement,Item> span(Key from, Key to)
             => let (reverse = compareKeys(from,to)==larger)
                 TernarySplayTreeMap { 
@@ -421,16 +418,15 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                             => reverse then compare(y,x)
                                        else compare(x,y); 
     };
-    
+
     shared actual TernarySplayTreeMap<KeyElement,Item> spanFrom(Key from)
             => TernarySplayTreeMap(higherEntries(from), compare);
-    
+
     shared actual TernarySplayTreeMap<KeyElement,Item> spanTo(Key to)     
             => TernarySplayTreeMap(
                     takeWhile((entry) => compareKeys(entry.key,to) != larger), 
                     compare);
-    
+
     shared actual TernarySplayTreeMap<KeyElement, Item> clone() 
             => copy(this);
-
 }
