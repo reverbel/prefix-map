@@ -176,9 +176,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 break;
             }
         }
-        if (exists outBox = outputBox) {
-            outBox.remainingKeyElements = keyRest;
-            outBox.lastMatchingNode = lastMatchingNode;
+        if (exists box = outputBox) {
+            box.remainingKeyElements = keyRest;
+            box.lastMatchingNode = lastMatchingNode;
         }
     }
     
@@ -286,139 +286,126 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     
     // End of initializer section
     
-    shared actual Node? search(Key key) => nothing;
-    
-    Boolean leaf(Node n)
-            => !(n.left exists) && !(n.middle exists) && !(n.right exists);
-    
-    Node? removeNodes(Node? node, MutableBox<Item> itemRemoved, Key key) {
-        if (!exists node) {
-            return null;
+    shared actual Node? search(Key key) {
+        if (root exists) {
+            value box = SplayOutputBox(key); 
+            splay(key, box);
+            if (box.remainingKeyElements.empty, 
+                exists node = box.lastMatchingNode,
+                node.terminal) {
+                return node;  
+            }
+            else {
+                return null;
+            }
         }
         else {
-            value e = node.element;
-            value first = key.first;
-            switch (compare(first, e))
-            case (smaller) {
-                node.left = removeNodes(node.left, itemRemoved, key);
-                if (exists left = node.left) {
-                    left.parent = node;
-                    return node;
-                }
-                else if (!node.terminal && !(node.middle exists)
-                    && !(node.right exists)) {
-                    return null; // prune non-terminal leaf node
-                }
-                else {
-                    return node;
-                }
+            return null;
+        }
+    }
+
+    // Removes the given `node` and puts one of its child nodes
+    // (the given `childNode`) in its the place.
+    void childNodeReplacesItsParent(Node? childNode, Node node) {
+        if (exists p = node.parent) {
+            if (exists pl = p.left, pl === node) {
+                p.left = childNode;
             }
-            case (larger) {
-                node.right = removeNodes(node.right, itemRemoved, key);
-                if (exists right = node.right) {
-                    right.parent = node;
-                    return node;
-                }
-                else if (!node.terminal && !(node.left exists) 
-                    && !(node.middle exists)) {
-                    return null; // prune non-terminal leaf node
-                }
-                else {
-                    return node;
-                }
+            else if (exists pm = p.middle, 
+                     pm === node) {
+                     p.middle = childNode;
             }
-            case (equal) {
-                if (nonempty rest = key.rest) {
-                    node.middle = removeNodes(node.middle, itemRemoved, rest);
-                    if (exists middle = node.middle) {
-                        middle.parent = node;
-                    }
-                    
-                    Node? retNode; // The node to be returned by this method
-                    // If `node` remains in the tree, `retNode` will be 
-                    // `node`. Otherwise, `retNode` will be either null
-                    // or a node that takes the place of `node`.
-                    
-                    if (!node.terminal && !(node.middle exists)) {
-                        // prune non-terminal nodes with no middle child 
-                        if (exists l = node.left, 
-                            exists r = node.right) {
-                            // The node to be pruned has two child nodes:
-                            // join the child subtrees together, creating
-                            // a subtree that will take the place of the
-                            // vanishing node. We have arbitrarily chosen 
-                            // to put the r subtree under the l subtree.
-                            //  (The other way around would also work.)
-                            Node descendRightmostBranch(Node n)
-                                    => if (exists rc = n.right)
-                            then descendRightmostBranch(rc)
-                            else n;
-                            value n = descendRightmostBranch(l);
-                            n.right = r;
-                            r.parent = n; 
-                            retNode = l;
-                        }
-                        else if (!(node.left exists)) {
-                            // right child will replace `node`
-                            retNode = node.right; // possibly null
-                        }
-                        else { // (!(node.right exists))
-                            // left child will replace `node`
-                            retNode = node.left;
-                        }
-                    }
-                    else {
-                        // `node` remains in the tree
-                        retNode = node;
-                    }
-                    return retNode;
-                }
-                else {
-                    // `node` has the last element of the key
-                    // is it a terminal node?
-                    if (node.terminal) {
-                        // yes: 
-                        // mark it as non terminal, 
-                        // effectively removing  the given `key` from the tree
-                        node.terminal = false;
-                        // retrieve the value no longer 
-                        // associated with the given `key` 
-                        Item? removedItem = node.item;
-                        assert(is Item removedItem);
-                        itemRemoved.content = removedItem;
-                        if (leaf(node)) {
-                            // `node` is a leaf: remove it
-                            return null; 
-                        }
-                        else {
-                            // current node is not a leaf node, 
-                            // so it must remain in the tree
-                            return node; 
-                        }
-                    }
-                    else {
-                        // no: 
-                        // cannot remove anything
-                        "a non-terminal node cannot be a leaf node"
-                        assert(!leaf(node));
-                        return node;
-                    }
-                }
+            else {
+                assert (exists pr = p.right,
+                        pr === node);
+                p.right = childNode;
+            }
+            if (exists theChild = childNode) {
+                theChild.parent = p;
+            }
+        }
+        else {
+            root = childNode;
+            if (exists theChild = childNode) {
+                theChild.parent = null;
             }
         }
     }
-    
+        
     shared actual Item? remove(Key key) {
-        value itemRemoved = MutableBox<Item> {
-            content = null;
-        };
-        root = removeNodes(root, itemRemoved, key);
-        if (exists r = root) {
-            r.parent = null;
+        if (root exists) {
+            value box = SplayOutputBox(key); 
+            splay(key, box);
+            if (box.remainingKeyElements.empty, 
+                exists node = box.lastMatchingNode,
+                node.terminal) {
+                
+                variable Node curNode = node;
+                assert (is Item theItem = node.item);
+                curNode.item = null;
+                curNode.terminal = false;
+                while (true) {
+                    if (!curNode.terminal && !node.middle exists) {
+                        if (exists curLeft = curNode.left) {
+                            if (exists curRight = curNode.right) {
+                                // both the left and the right child exist:
+                                // join the child subtrees together, creating
+                                // a subtree that will take the place of 
+                                // `curNode`. We have arbitrarily chosen to put 
+                                // the right subtree under the left subtree.
+                                //  (The other way around would also work.)
+                                Node descendRightmostBranch(Node n)
+                                        => if (exists rc = n.right)
+                                           then descendRightmostBranch(rc)
+                                           else n;
+                                value n = descendRightmostBranch(curLeft);
+                                n.right = curRight;
+                                curRight.parent = n; 
+                                // `curLeft` takes the place of `curNode`
+                                childNodeReplacesItsParent(curLeft, curNode);
+                                break;
+                            }
+                            else {
+                                // only the left child exists:
+                                // the left child takes the place of `curNode`
+                                childNodeReplacesItsParent(curLeft, curNode);
+                                break;
+                            }
+                        }
+                        else { 
+                            if (exists curRight = curNode.right) {
+                                // only the right child exists:
+                                // the right child will replace `curNode`
+                                childNodeReplacesItsParent(curRight, curNode);
+                            }
+                            else {
+                                // `curNode` is a non-terminal leaf node:
+                                // nobody will take its place
+                                childNodeReplacesItsParent(null, curNode);
+                                if (exists p = curNode.parent) {
+                                    curNode = p; // proceed at the parent node
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                        }
+                    }                    
+                } // end of while
+                return theItem;
+            }
+            else {
+                // there are unmatched key elements 
+                // (`remainingKeyElements` is non empty)
+                return null;
+            }
         }
-        return itemRemoved.content; 
+        else {
+            // `root` does not exist
+            return null;
+        }
     }
-    
+        
     //-------------------------------------------------------------------------
     
     shared actual TernarySplayTreeMap<KeyElement,Item> measure(Key from, 
@@ -446,10 +433,4 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     shared actual TernarySplayTreeMap<KeyElement, Item> clone() 
             => copy(this);
 
-
-    //shared actual Item? put(Key key, Item item) => nothing;
-    
-    //shared actual Item? remove(Key key) => nothing;
-    
-     
 }
