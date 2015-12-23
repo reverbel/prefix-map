@@ -305,7 +305,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     }
 
     // Removes the given `node` and puts one of its child nodes
-    // (the given `childNode`) in its the place.
+    // (the given `childNode`) in its place.
     void childNodeReplacesItsParent(Node? childNode, Node node) {
         if (exists p = node.parent) {
             if (exists pl = p.left, pl === node) {
