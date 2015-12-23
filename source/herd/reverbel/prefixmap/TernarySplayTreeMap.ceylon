@@ -73,28 +73,31 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             while (true) {
                 switch (compare(k.first, curNode.element))
                 case (smaller) {
-                    if (exists nextNode = curNode.left) {
-                        if (compare(k.first, nextNode.element) == smaller) {
+                    if (exists curLeft = curNode.left) {
+                        variable Node nextNode = curLeft;
+                        if (compare(k.first, curLeft.element) == smaller) {
                             // rotate right
-                            curNode.left = nextNode.right;
-                            if (exists n = nextNode.right) {
+                            curNode.left = curLeft.right;
+                            if (exists n = curLeft.right) {
                                 n.parent = curNode;
                             }
-                            nextNode.right = curNode;
+                            curLeft.right = curNode;
                             value curNodeParent = curNode.parent;
-                            curNode.parent = nextNode;
-                            nextNode.parent = curNodeParent;
-                            curNode = nextNode;
-                            if (!curNode.left exists) { 
-                                break; 
+                            curNode.parent = curLeft;
+                            curLeft.parent = curNodeParent;
+                            curNode = curLeft;
+                            if (exists leftChild = curNode.left) { 
+                                nextNode = leftChild;
+                            }
+                            else {
+                                break;
                             }
                         }
                         // link right
                         r.left = curNode;
                         curNode.parent = r;
                         r = curNode;
-                        assert (exists leftChild = curNode.left);
-                        curNode = leftChild;
+                        curNode = nextNode;
                     }
                     else {
                         break;
@@ -105,28 +108,31 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     break;
                 }
                 case (larger) {
-                    if (exists nextNode = curNode.right) {
-                        if (compare(k.first, nextNode.element) == larger) {      
+                    if (exists curRight = curNode.right) {
+                        variable Node nextNode = curRight;
+                        if (compare(k.first, curRight.element) == larger) {      
                             // rotate left
-                            curNode.right = nextNode.left;
-                            if (exists n = nextNode.left) {
+                            curNode.right = curRight.left;
+                            if (exists n = curRight.left) {
                                 n.parent = curNode;
                             }
-                            nextNode.left = curNode;
+                            curRight.left = curNode;
                             value curNodeParent = curNode.parent;
-                            curNode.parent = nextNode;
-                            nextNode.parent = curNodeParent;
-                            curNode = nextNode;
-                            if (!curNode.right exists) {
-                                break; 
+                            curNode.parent = curRight;
+                            curRight.parent = curNodeParent;
+                            curNode = curRight;
+                            if (exists rightChild = curNode.right) {
+                                nextNode = rightChild;
+                            }
+                            else {
+                                break;
                             }
                         }
                         // link left
                         l.right = curNode;
                         curNode.parent = l;
                         l = curNode;
-                        assert (exists rightChild = curNode.right);
-                        curNode = rightChild;
+                        curNode = nextNode;
                     }
                     else {
                         break;
@@ -158,7 +164,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 root = curNode;
                 curNode.parent = null;
             }
-            // bottom of inner loop
+            // bottom of outer loop
             if (keyElementFound) {
                 keyRest = k.rest;
                 lastMatchingNode = curNode;
@@ -289,8 +295,8 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             value box = SplayOutputBox(key); 
             splay(key, box);
             if (box.remainingKeyElements.empty, 
-                exists node = box.lastMatchingNode,
-                node.terminal) {
+                    exists node = box.lastMatchingNode,
+                    node.terminal) {
                 return node;  
             }
             else {
