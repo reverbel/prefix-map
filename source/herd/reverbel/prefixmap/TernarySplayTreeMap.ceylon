@@ -47,8 +47,8 @@ shared class TernarySplayTreeMap<KeyElement, Item>
            then nodeToClone.deepCopy() else null;
 
     class SplayOutputBox(Key key) {
-        shared variable Node? lastMatchingNode = null;
         shared variable KeyElement[] remainingKeyElements = key;
+        shared variable Node? lastMatchingNode = null;
     }
 
     void splay(Key key, SplayOutputBox? outputBox = null) {
@@ -294,10 +294,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         if (root exists) {
             value box = SplayOutputBox(key); 
             splay(key, box);
-            if (box.remainingKeyElements.empty, 
-                    exists node = box.lastMatchingNode,
-                    node.terminal) {
-                return node;  
+            if (box.remainingKeyElements.empty 
+                    && box.lastMatchingNode exists) {
+                return box.lastMatchingNode;  
             }
             else {
                 return null;
