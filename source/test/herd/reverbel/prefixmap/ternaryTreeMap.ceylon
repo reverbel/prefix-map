@@ -328,12 +328,20 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     print(map);
     map.printNodes();
     
+    print("will remove \"donut\" -------------------------------------------");
     n = map.remove(toSequence("donut"));
     print(n);
     print(map);
     map.printNodes();
     
+    print("will remove \"day\" ---------------------------------------------");
     n = map.remove(toSequence("day"));
+    print(n);
+    print(map);
+    map.printNodes();
+    
+    print("will remove \"caste\" -------------------------------------------");
+    n = map.remove(toSequence("caste"));
     print(n);
     print(map);
     map.printNodes();
