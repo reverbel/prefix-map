@@ -1,4 +1,4 @@
-import herd.reverbel.prefixmap { TernaryTreeMap, TernarySplayTreeMap }
+import herd.reverbel.prefixmap { TernarySearchTreeMap, TernarySplayTreeMap }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
 import ceylon.file { ... }
@@ -20,12 +20,12 @@ String toString([Character+] charSeq) {
 }
 
 shared test void testEmptyTernaryTreeMap() {
-    value map = TernaryTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, Integer>();
     assertTrue(map.empty);
 }
 
 shared test void testSingleEntryTernaryTreeMap() {
-    value map = TernaryTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, Integer>();
     value key = toSequence("0123456789");
     map.put(key, key.size);
     assertFalse(map.empty);
@@ -69,7 +69,7 @@ shared test void testSingleEntryTernaryTreeMap() {
 }
 
 shared test void testMultipleEntryTernaryTreeMap() {
-    value map = TernaryTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, Integer>();
     variable Integer? n;
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
@@ -108,7 +108,7 @@ shared test void testMultipleEntryTernaryTreeMap() {
     originalMap.printNodes();
     print(originalMap.size);
     
-    value m = TernaryTreeMap {
+    value m = TernarySearchTreeMap {
         entries = { for (str in strings) toSequence(str) -> str.size };
         Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
     };
@@ -119,11 +119,11 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print(m.first);
     print(m.last);
     
-    value x15 = TernaryTreeMap({ toSequence("X")-> 15 });
+    value x15 = TernarySearchTreeMap({ toSequence("X")-> 15 });
     print(x15.first);
     print(x15.last);
     
-    value aaa = TernaryTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2, toSequence("abc")-> 3});
+    value aaa = TernarySearchTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2, toSequence("abc")-> 3});
     print(aaa.first);
     print(aaa.last);
 
@@ -177,7 +177,7 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print("\n");
     print("\n");
     
-    value ab = TernaryTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2});
+    value ab = TernarySearchTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2});
     print(ab);
     print("\n");
     print("\n");
@@ -208,7 +208,7 @@ shared test void testTernaryTreeMapWithFullDictionary() {
         
         try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
                                           writer2 = outputFile2.Overwriter()) {
-            value map = TernaryTreeMap<Character, Integer>();
+            value map = TernarySearchTreeMap<Character, Integer>();
             while (exists word = reader.readLine()) { 
                 map.put(toSequence(word), word.size);
             }

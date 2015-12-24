@@ -1,5 +1,5 @@
 shared class TernarySplayTreeMap<KeyElement, Item> 
-        extends AbstractTernaryTree<KeyElement, Item> 
+        satisfies TernaryTreeMap<KeyElement, Item> 
         given KeyElement satisfies Comparable<KeyElement> {
 
     "The root node of the tree."
@@ -26,8 +26,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
          If `compare` is absent, the comparator method of interface
          [[Comparable]] will be used to compare `KeyElement`s."
         Comparison(KeyElement, KeyElement) compare = 
-                (KeyElement x, KeyElement y) => x.compare(y)
-    ) extends AbstractTernaryTree<KeyElement, Item>() {
+                (KeyElement x, KeyElement y) => x.compare(y)) {
         this.entries = entries;
         nodeToClone = null;
         this.compare = compare;
@@ -35,11 +34,10 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     "Create a new `TernarySplayTreeMap` with the same entries and 
      comparator function as the given `TernarySplayTreeMap`."
-    shared new copy(TernarySplayTreeMap<KeyElement,Item> abstractTernaryTree)
-            extends AbstractTernaryTree<KeyElement, Item>() {
+    shared new copy(TernarySplayTreeMap<KeyElement,Item> sourceMap) {
         entries = {};
-        nodeToClone = abstractTernaryTree.root;
-        compare = abstractTernaryTree.compare;
+        nodeToClone = sourceMap.root;
+        compare = sourceMap.compare;
     }
 
     // initialization of root
@@ -439,4 +437,10 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     shared actual TernarySplayTreeMap<KeyElement, Item> clone() 
             => copy(this);
+    
+    shared actual Boolean equals(Object that)
+            => (super of TernaryTreeMap<KeyElement, Item>).equals(that);
+    
+    shared actual Integer hash
+            => (super of TernaryTreeMap<KeyElement, Item>).hash;
 }
