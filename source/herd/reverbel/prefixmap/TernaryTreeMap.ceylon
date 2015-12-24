@@ -13,9 +13,7 @@ variable Integer paddedElementSize = 1;
 variable Integer paddedItemSize = 6;
 
 "A node of a ternary tree."
-see (`interface TernaryTreeMap`)
-by ("Francisco Reverbel")
-shared class TreeNode<KeyElement, Item>(element)
+class TreeNode<KeyElement, Item>(element)
         given KeyElement satisfies Object {
     "The key element in this node."
     shared KeyElement element;
@@ -100,7 +98,7 @@ shared class TreeNode<KeyElement, Item>(element)
     }
 }
 
-"""A mutable [[PrefixMap]] implemented using a _ternary 
+"""A mutable [[PrefixMap]] backed by a _ternary 
    search tree_ whose keys are sequences of [[Comparable]] elements. 
    Map entries are mantained in lexicographic order of keys, from the 
    smallest to the largest key. The lexicographig ordering of keys 
@@ -146,11 +144,14 @@ shared interface TernaryTreeMap<KeyElement, Item>
     "A node of this tree. `Node` is a convenient alias for
      `TreeNode<KeyElement, Item>`."
     see (`class TreeNode`)
-    shared class Node(KeyElement element) 
+    class Node(KeyElement element) 
             => TreeNode<KeyElement, Item>(element);
     
+    shared formal Object? rootNode;
+    
     "The root node of the tree."
-    shared formal variable Node? root;
+    Node? root
+        => if (is Node r = rootNode) then r else null;
 
     "A comparator function used to sort the entries."
     shared formal Comparison(KeyElement, KeyElement) compare;
@@ -170,11 +171,11 @@ shared interface TernaryTreeMap<KeyElement, Item>
      `tree.search(key)` returns a non-terminal node, then the given `key`
      appears only as a prefix of some key in the tree, and there is no 
      item associated with `key`."
-    shared formal Node? search(Key key);
+    shared formal Object? search(Key key);
     
     Node? lookup(Key key)
             => let (node = search(key))
-               if (exists node, node.terminal) then node else null; 
+               if (is Node node, node.terminal) then node else null; 
     
     shared actual Item? get(Object key)
             => if (is Key key) 
@@ -608,7 +609,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => entriesWithPrefix(prefix).map(Entry.key);
     
     shared actual {<Key->Item>*} entriesWithPrefix(Object prefix) {
-        if (is Key prefix, exists node = search(prefix)) {
+        if (is Key prefix, is Node node = search(prefix)) {
             value queue = ArrayList<Key->Item>();
             if (node.terminal) {
                 assert (is Item i = node.item);
@@ -623,9 +624,6 @@ shared interface TernaryTreeMap<KeyElement, Item>
             return {};
         }
     }
-    
-    shared actual void clear() 
-            => root = null;
     
     shared actual Integer size 
             => root?.size else 0;

@@ -13,21 +13,30 @@ class MutableBox<Item>(shared variable Item? content) {}
    [[TernaryTreeMap]]."""
 see (`interface PrefixMap`, `interface Map`, 
      `class Entry`, `interface Comparable`,
-     `interface TernaryTreeMap`, `class TernaryTreeMap.Node`)
+     `interface TernaryTreeMap`)
 tagged ("Collections")
 by ("Francisco Reverbel")
 shared class TernarySearchTreeMap<KeyElement, Item> 
         satisfies TernaryTreeMap<KeyElement, Item> 
         given KeyElement satisfies Comparable<KeyElement> {
     
+    "A node of this tree. `Node` is a convenient alias for
+     `TreeNode<KeyElement, Item>`."
+    see (`class TreeNode`)
+    class Node(KeyElement element) 
+            => TreeNode<KeyElement, Item>(element);
+     
     "The root node of the tree."
-    shared actual variable Node? root;
+    variable Node? root = null;
+    
+    shared actual Object? rootNode
+            => root;
     
     "The initial entries in the map."
-    shared {<Key->Item>*} entries;
+    {<Key->Item>*} entries;
     
     "Alternatively, the root node of a tree to clone."
-    shared Node? nodeToClone;
+    Node? nodeToClone;
     
     "A comparator function used to sort the entries."
     shared actual Comparison(KeyElement, KeyElement) compare;
@@ -172,7 +181,7 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         }
     }
     
-    shared actual Node? search(Key key)
+    shared actual Object? search(Key key)
             => recursiveSearch(key, root);
     
    /*
@@ -334,6 +343,9 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         }
         return itemRemoved.content; 
     }
+    
+    shared actual void clear()
+            => root = null;
     
     shared actual TernarySearchTreeMap<KeyElement,Item> measure(Key from, 
                                                           Integer length)

@@ -2,14 +2,23 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         satisfies TernaryTreeMap<KeyElement, Item> 
         given KeyElement satisfies Comparable<KeyElement> {
 
+    "A node of this tree. `Node` is a convenient alias for
+     `TreeNode<KeyElement, Item>`."
+    see (`class TreeNode`)
+    class Node(KeyElement element) 
+            => TreeNode<KeyElement, Item>(element);
+    
     "The root node of the tree."
-    shared actual variable Node? root;
-
+    variable Node? root = null;
+    
+    shared actual Object? rootNode
+            => root;
+    
     "The initial entries in the map."
-    shared {<Key->Item>*} entries;
+    {<Key->Item>*} entries;
 
     "Alternatively, the root node of a tree to clone."
-    shared Node? nodeToClone;
+    Node? nodeToClone;
 
     "A comparator function used to sort the entries."
     shared actual Comparison(KeyElement, KeyElement) compare;
@@ -292,7 +301,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     // End of initializer section
 
-    shared actual Node? search(Key key) {
+    shared actual Object? search(Key key) {
         if (root exists) {
             value box = SplayOutputBox(); 
             splay(key, box);
@@ -413,6 +422,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     //-------------------------------------------------------------------------
 
+    shared actual void clear()
+            => root = null;
+    
     shared actual TernarySplayTreeMap<KeyElement,Item> measure(Key from, 
                                                                Integer length)
             => TernarySplayTreeMap(higherEntries(from).take(length), compare);
