@@ -46,8 +46,8 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
 
-    class SplayOutputBox(Key key) {
-        shared variable KeyElement[] remainingKeyElements = key;
+    class SplayOutputBox() {
+        shared variable KeyElement[] remainingKeyElements = [];
         shared variable Node? lastMatchingNode = null;
     }
 
@@ -58,6 +58,10 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         variable Key k = key;
         variable KeyElement[] keyRest = key;
         variable Boolean keyElementFound;
+        if (exists box = outputBox) {
+            box.remainingKeyElements = key;
+            box.lastMatchingNode = null;
+        }
         if (!auxNode exists) {
             auxNode = Node(key.first);
         }
@@ -209,7 +213,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     shared actual Item? put(Key key, Item item) {
         if (root exists) {
-            value outBox = SplayOutputBox(key); 
+            value outBox = SplayOutputBox(); 
             splay(key, outBox);
             if (nonempty keySuffix = outBox.remainingKeyElements) {
                 Node newSubtree = newVerticalPath(null, keySuffix, item);
@@ -292,7 +296,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     shared actual Node? search(Key key) {
         if (root exists) {
-            value box = SplayOutputBox(key); 
+            value box = SplayOutputBox(); 
             splay(key, box);
             if (box.remainingKeyElements.empty) { 
                 //assert (box.lastMatchingNode exists);
@@ -337,7 +341,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     shared actual Item? remove(Key key) {
         if (root exists) {
-            value box = SplayOutputBox(key); 
+            value box = SplayOutputBox(); 
             splay(key, box);
             if (box.remainingKeyElements.empty, 
                     exists node = box.lastMatchingNode,
@@ -346,54 +350,55 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 assert (is Item theItem = node.item);
                 curNode.item = null;
                 curNode.terminal = false;
-                while (true) {
-                    if (!curNode.terminal && !node.middle exists) {
-                        if (exists curLeft = curNode.left) {
-                            if (exists curRight = curNode.right) {
-                                // both the left and the right child exist:
-                                // join the child subtrees together, creating
-                                // a subtree that will take the place of 
-                                // `curNode`. We have arbitrarily chosen to put 
-                                // the right subtree under the left subtree.
-                                //  (The other way around would also work.)
-                                Node descendRightmostBranch(Node n)
-                                        => if (exists rc = n.right)
-                                           then descendRightmostBranch(rc)
-                                           else n;
-                                value n = descendRightmostBranch(curLeft);
-                                n.right = curRight;
-                                curRight.parent = n; 
-                                // `curLeft` takes the place of `curNode`
-                                childNodeReplacesItsParent(curLeft, curNode);
-                                break;
+                while (!curNode.terminal && !curNode.middle exists) {
+                    if (exists curLeft = curNode.left) {
+                        if (exists curRight = curNode.right) {
+                            // both the left and the right child exist:
+                            // join the child subtrees together, creating
+                            // a subtree that will take the place of 
+                            // `curNode`. We have arbitrarily chosen to put 
+                            // the right subtree under the left subtree.
+                            //  (The other way around would also work.)
+                            Node descendRightmostBranch(Node n)
+                                    => if (exists rc = n.right)
+                                       then descendRightmostBranch(rc)
+                                       else n;
+                            value n = descendRightmostBranch(curLeft);
+                            n.right = curRight;
+                            curRight.parent = n; 
+                            // `curLeft` takes the place of `curNode`
+                            childNodeReplacesItsParent(curLeft, curNode);
+                            break; // `curNode = curLeft;` also works here
+                            
+                        }
+                        else {
+                            // only the left child exists:
+                            // the left child takes the place of `curNode`
+                            childNodeReplacesItsParent(curLeft, curNode);
+                            break; // `curNode = curLeft;` also works here
+                        }
+                    }
+                    else { 
+                        if (exists curRight = curNode.right) {
+                            // only the right child exists:
+                            // the right child will replace `curNode`
+                            childNodeReplacesItsParent(curRight, curNode);
+                            break; // `curNode = curRight;` also works here
+                            
+                        }
+                        else {
+                            // `curNode` is a non-terminal leaf node:
+                            // nobody will take its place
+                            childNodeReplacesItsParent(null, curNode);
+                            if (exists p = curNode.parent) {
+                                curNode = p; // proceed at the parent node
                             }
                             else {
-                                // only the left child exists:
-                                // the left child takes the place of `curNode`
-                                childNodeReplacesItsParent(curLeft, curNode);
                                 break;
                             }
                         }
-                        else { 
-                            if (exists curRight = curNode.right) {
-                                // only the right child exists:
-                                // the right child will replace `curNode`
-                                childNodeReplacesItsParent(curRight, curNode);
-                            }
-                            else {
-                                // `curNode` is a non-terminal leaf node:
-                                // nobody will take its place
-                                childNodeReplacesItsParent(null, curNode);
-                                if (exists p = curNode.parent) {
-                                    curNode = p; // proceed at the parent node
-                                }
-                                else {
-                                    break;
-                                }
-                            }
-                        }
-                    }                    
-                } // end of while
+                    }
+                }
                 return theItem;
             }
             else {
