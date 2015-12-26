@@ -44,8 +44,8 @@
    are an extension of Sleator and Tarjan's plain (binary) _splay trees_,
    and were first presented in [the same (aforementioned) 
    paper][sleator-tarjan] that developed and analyzed splay trees. Both
-   varieties of splay trees use the same reestructuring heuristic and their
-   operations have similar amortized time bounds. 
+   varieties of splay trees use the same reestructuring heuristic and have
+   operations with similar amortized time bounds.
 
    [sleator-tarjan]: http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf 
                      "Self-Adjusting Binary Search Trees"
