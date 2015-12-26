@@ -1,3 +1,19 @@
+"A mutable [[PrefixMap]] implemented by a _ternary splay tree_ 
+ whose keys are sequences of [[Comparable]] elements. Map entries 
+ are mantained in lexicographic order of keys, from the smallest
+ to the largest key. The lexicographic ordering of keys relies on 
+ comparisons of [[KeyElement]]s, performed either by the method 
+ `compare` of the interface [[Comparable]] or by a comparator 
+ function specified when the map is created.
+
+ Ternary splay trees are also known as _lexicographic splay trees_.
+ For information on such trees, see the documentation of module 
+ [`herd.reverbel.prefixmap`](index.html)."
+see (`interface PrefixMap`, `interface Map`, 
+    `class Entry`, `interface Comparable`,
+    `interface TernaryTreeMap`)
+tagged ("Collections")
+by ("Francisco Reverbel")
 shared class TernarySplayTreeMap<KeyElement, Item> 
         satisfies TernaryTreeMap<KeyElement, Item> 
         given KeyElement satisfies Comparable<KeyElement> {

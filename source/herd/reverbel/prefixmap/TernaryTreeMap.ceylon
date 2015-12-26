@@ -15,21 +15,28 @@ variable Integer paddedItemSize = 6;
 "A node of a ternary tree."
 class TreeNode<KeyElement, Item>(element)
         given KeyElement satisfies Object {
+    
     "The key element in this node."
     shared KeyElement element;
+    
     "The optional item in this node. It must be present in a terminal 
      node and is (logically) absent in a non-terminal node."
     shared variable Item? item = null;
-    "The parent node, which is null in the 
+    
+    "The parent node, which is `null` in the 
      case of the root of a ternary tree."
     shared variable TreeNode<KeyElement, Item>? parent = null;
+    
     "The optional left child node."
     shared variable TreeNode<KeyElement, Item>? left = null;
+    
     "The optional middle child node. A node with 
      no middle child must be terminal."
     shared variable TreeNode<KeyElement, Item>? middle = null;
+    
     "The optional right child node."
     shared variable TreeNode<KeyElement, Item>? right = null;
+    
     "True if this is a terminal node, false otherwise."
     shared variable Boolean terminal = false;
     
@@ -98,42 +105,31 @@ class TreeNode<KeyElement, Item>(element)
     }
 }
 
-"""A mutable [[PrefixMap]] backed by a _ternary 
-   search tree_ whose keys are sequences of [[Comparable]] elements. 
-   Map entries are mantained in lexicographic order of keys, from the 
-   smallest to the largest key. The lexicographig ordering of keys 
-   relies on comparisons of [[KeyElement]]s, performed by a formal
-   `compare` method.
+"""A mutable [[PrefixMap]] backed by a _ternary search tree_ whose 
+   keys are sequences of [[Comparable]] elements. Map entries are 
+   mantained in lexicographic order of keys, from the smallest to 
+   the largest key. The lexicographic ordering of keys relies on 
+   [[KeyElement]] comparisons performed by a formal `compare`
+   function. The [[TernaryTreeMap]] implementations in this package 
+   provide a default `compare` function based on the "natural" 
+   comparison of key elements. (The default function merely delegates
+   its task to the [[KeyElement]]s themselves, which are [[Comparable]]).  
+   Moreover, these [[TernaryTreeMap]] implementations also accept
+   client-defined comparison functions, for example to specify a 
+   character ordering that groups together uppercase and lowercase 
+   letters.
    
-   This is an abstract superclass for the concrete ternary tree map
-   implementations [[TernarySearchTreeMap]] and `TernarySplayTreeMap`.
-   Concrete subclasses of `TernaryTreeMap` must provide concrete
-   implementations for the formal attributes [[root]] and [[compare]] and
-   for the formal methods [[search]], [[put]], [[remove]], [[measure]], 
-   [[span]], [[spanFrom]], [[spanTo]], and [[clone]].     
-   
-   Ternary search trees are also known as _lexicographic search trees_.
-   For a very short, formal and precise definition of such trees, see
-   pages 674-676 of Sleator and Tarjan's paper "Self-Adjusting Binary 
-   Search Trees", available [here][sleator-tarjan]. The relevant part
-   is in section 6, "Two Applications of Splaying", starting at the 
-   bottom of page 674 and going up to the first paragraph of page 676. 
-   For a longer discussion, see Bentley and Sedgewick's paper "Fast 
-   Algorithms for Sorting and Searching Strings", available 
-   [here][bentley-sedgewick], or their article "Ternary Search Trees"
-   [in Dr. Dobb's][ternary-search-trees].
-   
-   [sleator-tarjan]: http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf 
-                     "Self-Adjusting Binary Search Trees"
-                     
-   [bentley-sedgewick]: https://www.cs.princeton.edu/~rs/strings/paper.ps
-                        "Fast Algorithms for Sorting and Searching Strings"
-                     
-   [ternary-search-trees]: http://www.drdobbs.com/database/ternary-search-trees/184410528
-                        "Ternary Search Trees" """
+   [[TernaryTreeMap]] is an abstract supertype for the concrete ternary
+   tree map implementations [[TernarySearchTreeMap]] and
+   [[TernarySplayTreeMap]]. In order to satisfy the [[TernaryTreeMap]]
+   interface, a concrete class must provide actual implementations for 
+   the formal attributes [[rootNode]] and [[compare]] and for the 
+   formal methods [[search]], [[put]], [[remove]], [[measure]], 
+   [[span]], [[spanFrom]], [[spanTo]], and [[clone]]."""
 see (`interface PrefixMap`, `interface Map`, 
     `class Entry`, `interface Comparable`,
-     `class TreeNode`, `class TernarySearchTreeMap`)
+     `class TreeNode`, `class TernarySearchTreeMap`, 
+      `class TernarySplayTreeMap`)
 tagged ("Collections")
 by ("Francisco Reverbel")
 shared interface TernaryTreeMap<KeyElement, Item>
@@ -147,14 +143,27 @@ shared interface TernaryTreeMap<KeyElement, Item>
     class Node(KeyElement element) 
             => TreeNode<KeyElement, Item>(element);
     
+    "An object that is the root node of the tree, or `null` in the case 
+     of an empty tree. __This attribute is not intended for use by client
+     code.__ Its purpose is merely to serve as a \"hook\" through which
+     methods actually defined by interface [[TernaryTreeMap]] have access
+     to the root object provided by a concrete [[TernaryTreeMap]]
+     implementation.
+     
+     In order to check if this map is empty, client code should use the
+     attribute [[empty]] instead."
     shared formal Object? rootNode;
     
-    "The root node of the tree."
-    Node? root
-        => if (is Node r = rootNode) then r else null;
-
-    "A comparator function used to sort the entries."
+    "A comparator function used to sort the key elements."
     shared formal Comparison(KeyElement, KeyElement) compare;
+    
+    "Determines if this map is empty, that is, if it has no entries."
+    shared actual default Boolean empty 
+            => rootNode is Null;
+    
+    "The root node of the tree, or `null` in the case of an empty tree."
+    Node? root
+            => if (is Node r = rootNode) then r else null;
     
     //shared actual formal TernaryTree<KeyElement, Item> clone();
     
@@ -162,15 +171,23 @@ shared interface TernaryTreeMap<KeyElement, Item>
 
     //shared actual formal Item? remove(Key key);
     
-    "Searches for a `key` in this ternary tree. Returns either the last node 
-     of a middle path with the sequence of elements of the given `key`, or 
-     null if there is no such middle path. A node returned by `search` is 
-     not necessarily terminal. If `tree.search(key)` returns a terminal
-     node, then the given `key` is actually present in the tree, and the 
-     returned node contains the item associated with that key. If 
+    "Searches for a `key` in this ternary tree. __This method is not intended
+     for use by client code.__ Its purpose is merely to serve as a \"hook\" 
+     through which methods actually defined by interface [[TernaryTreeMap]]
+     have access to search functionality provided by a concrete
+     [[TernaryTreeMap]] implementation. 
+     
+     A call to [[search]] returns either the last node of a middle path 
+     with the sequence of elements of the given `key`, or `null` if there 
+     is no such middle path. A node returned by `search` is not necessarily
+     terminal. If `tree.search(key)` returns a terminal node, then the given
+     `key` is actually present in the tree, and the returned node contains the item associated with that key. If 
      `tree.search(key)` returns a non-terminal node, then the given `key`
      appears only as a prefix of some key in the tree, and there is no 
-     item associated with `key`."
+     item associated with `key`.
+
+     In order to search for a key in this map, client code should use the
+     method [[lookup]] instead."
     shared formal Object? search(Key key);
     
     Node? lookup(Key key)
@@ -189,11 +206,11 @@ shared interface TernaryTreeMap<KeyElement, Item>
 
     "Returns the terminal node that corresponds to the first entry (in
      lexicographic order) within the subtree rooted at the given `root`,
-     or null if that subtree is empty (i.e., if `root` does not exist).
+     or `null` if that subtree is empty (i.e., if `root` does not exist).
      Whenever this method returns a terminal node, it also adds to the
      list `key` the sequence of key elements that forms the key in the
-     corresponding entry. If this method returns null, it leaves the
-     list `key` unchanged." 
+     corresponding entry. Whenever this method returns `null`, it leaves 
+     unchanged list `key`." 
     Node? firstTerminalNode(MutableList<KeyElement> key, Node? root) {
         if (exists node = root) {
             variable Node current = node;
@@ -220,11 +237,11 @@ shared interface TernaryTreeMap<KeyElement, Item>
     
     "Returns the terminal node that corresponds to the last entry (in
      lexicographic order) within the subtree rooted at the given `root`,
-     or null if that subtree is empty (i.e., if `root` does not exist).
+     or `null` if that subtree is empty (i.e., if `root` does not exist).
      Whenever this method returns a terminal node, it also adds to the
      list `key` the sequence of key elements that forms the key in the
-     corresponding entry. If this method returns null, it leaves the
-     list `key` unchanged."  
+     corresponding entry. Whenever this method returns `null`, it leaves
+     unchanged the list `key`."  
     Node? lastTerminalNode(MutableList<KeyElement> key, Node? root) {
         if (exists node = root) {
             variable Node current = node;
@@ -268,9 +285,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
         variable Node? previousNode = null;
         shared actual <Key->Item>|Finished next() {
             if (exists current = currentNode) {
-                value theEntry = entry(keyPrefix, current);
                 // Will return `theEntry`,
                 // but must update the iterator state before returning
+                value theEntry = entry(keyPrefix, current);
                 variable Node node = current;  
                 variable Boolean done = false;
                 void proceedTo(Node n) {
@@ -291,7 +308,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
                     done = true;
                 }
                 // Leaves the loop below with `node` containing the next
-                // terminal `Node` to visit or with `currentNode` set to null 
+                // terminal `Node` to visit or with `currentNode` set to `null` 
                 while (!done) {
                     if (exists previous = previousNode) {
                         previousNode = node;
@@ -400,9 +417,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
         variable Node? previousNode = null;
         shared actual <Key->Item>|Finished next() {
             if (exists current = currentNode) {
-                value theEntry = entry(keyPrefix, current);
                 // Will return `theEntry`,
                 // but must update the iterator state before returning
+                value theEntry = entry(keyPrefix, current);
                 variable Node node = current;  
                 variable Boolean done = false;
                 void proceedTo(Node n) {
@@ -433,7 +450,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
                     done = true;
                 }
                 // Leaves the loop below with `node` containing the next
-                // terminal `Node` to visit or with `currentNode` set to null 
+                // terminal `Node` to visit or with `currentNode` set to `null` 
                 while (!done) {
                     if (exists previous = previousNode) {
                         previousNode = node;
@@ -568,10 +585,10 @@ shared interface TernaryTreeMap<KeyElement, Item>
         return EntryIterator(key, node);
     }
     
-    // Puts in the given `queue` all the entries with the given 
-    // `keyPrefix` in the subtree rooted at the given `node`. 
-    // The entries are enqueued in lexicographic order of keys, 
-    // from the smallest to the largest key.  
+    "Puts in the given `queue` all the entries with the given 
+     `keyPrefix` in the subtree rooted at the given `node`. 
+     The entries are enqueued in lexicographic order of keys, 
+     from the smallest to the largest key."  
     void enumerateEntries(Node? node, 
                           MutableList<KeyElement> keyPrefix, 
                           MutableList<Key->Item> queue) {
@@ -636,7 +653,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
 
 
     "Returns the node with the largest element less than or equal to `e`
-     within the _binary_ subtree rooted at the given `node`, or null if 
+     within the _binary_ subtree rooted at the given `node`, or `null` if 
      all the nodes of that subtree have elements greater than `e`."
     Node? bstFloor(KeyElement e, Node? node = root) {
         variable Node? currentNode = node;
@@ -657,9 +674,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
         return bestSoFar;
     }
     
-    // Returns the node with the largest element less than `e` within the
-    // _binary_ subtree rooted at the given `node`, or null if all nodes
-    // of that subtree have elements greater than or equal to `e`.  
+    "Returns the node with the largest element less than `e` within the
+     _binary_ subtree rooted at the given `node`, or `null` if all nodes
+     of that subtree have elements greater than or equal to `e`."  
     Node? bstStrictFloor(KeyElement e, Node? node = root) {
         variable Node? currentNode = node;
         variable Node? bestSoFar = null;
@@ -677,7 +694,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
     
     "Returns the node with the smallest element greater than or equal
      to  `e` within the _binary_ subtree rooted at the given `node`, or
-     null if all the nodes of that subtree have elements less than `e`."  
+     `null` if all the nodes of that subtree have elements less than `e`."  
     Node? bstCeiling(KeyElement e, Node? node = root) {
         variable Node? currentNode = node;
         variable Node? bestSoFar = null;
@@ -698,7 +715,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
     }
     
     "Returns the node with the smallest element greater than `e` within
-     the _binary_ subtree rooted at the given `node`, or null if all the
+     the _binary_ subtree rooted at the given `node`, or `null` if all the
      nodes of that subtree have elements less than or equal to `e`."
     Node? bstStrictCeiling(KeyElement e, Node? node = root) {
         variable Node? currentNode = node;
@@ -716,7 +733,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
     }
     
     "Returns the terminal node with the largest key less than or equal to
-     `key` within the ternary subtree rooted at the given `node`, or null
+     `key` within the ternary subtree rooted at the given `node`, or `null`
      if all the terminal nodes of that subtree have keys greater than `key`."  
     Node? floor(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
         if (exists cur = bstFloor(key.first, node)) {
@@ -804,7 +821,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
     }
 
     "Returns the terminal node with the smallest key greater than or equal to
-     `key` within the ternary subtree rooted at the given `node`, or null
+     `key` within the ternary subtree rooted at the given `node`, or `null`
      if all the terminal nodes of that subtree have keys less than `key`."  
     Node? ceiling(Key key, 
                   MutableList<KeyElement> keyAccumulator, Node? node) {

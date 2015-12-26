@@ -1,16 +1,16 @@
 class MutableBox<Item>(shared variable Item? content) {}
 
-"""A mutable [[PrefixMap]] implemented using a _ternary search tree_ 
-   whose keys are sequences of [[Comparable]] elements. Map entries 
-   are mantained in lexicographic order of keys, from the smallest
-   to the largest key. The lexicographig ordering of keys relies on 
-   comparisons of [[KeyElement]]s, performed either by the method 
-   `compare` of the interface [[Comparable]] or by a comparator 
-   function specified when the map is created.
+"A mutable [[PrefixMap]] implemented by a _ternary search tree_ 
+ whose keys are sequences of [[Comparable]] elements. Map entries 
+ are mantained in lexicographic order of keys, from the smallest
+ to the largest key. The lexicographic ordering of keys relies on 
+ comparisons of [[KeyElement]]s, performed either by the method 
+ `compare` of the interface [[Comparable]] or by a comparator 
+ function specified when the map is created.
  
-   Ternary search trees are also known as _lexicographic search trees_.
-   For information on such trees, see the documentation of interface
-   [[TernaryTreeMap]]."""
+ Ternary search trees are also known as _lexicographic search trees_.
+ For information on such trees, see the documentation of module 
+ [`herd.reverbel.prefixmap`](index.html)."
 see (`interface PrefixMap`, `interface Map`, 
      `class Entry`, `interface Comparable`,
      `interface TernaryTreeMap`)
