@@ -43,7 +43,7 @@
    a self-adjusting form of ternary search tree. Ternary splay trees
    are an extension of Sleator and Tarjan's plain (binary) _splay trees_,
    and were first presented in [the same (aforementioned) 
-   paper][sleator-tarjan] that developed and analysed splay trees. Both
+   paper][sleator-tarjan] that developed and analyzed splay trees. Both
    varieties of splay trees use the same reestructuring heuristic and their
    operations have similar amortized time bounds. 
 
