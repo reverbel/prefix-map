@@ -68,7 +68,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     // initialization of root
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
-
+    
     class SplayOutputBox() {
         shared variable KeyElement[] remainingKeyElements = [];
         shared variable Node? lastMatchingNode = null;
@@ -436,39 +436,20 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         }
     }
 
-    //-------------------------------------------------------------------------
-
     shared actual void clear()
             => root = null;
     
-    shared actual TernarySplayTreeMap<KeyElement,Item> measure(Key from, 
-                                                               Integer length)
-            => TernarySplayTreeMap(higherEntries(from).take(length), compare);
-
-    shared actual TernarySplayTreeMap<KeyElement,Item> span(Key from, Key to)
-            => let (reverse = compareKeys(from,to)==larger)
-                TernarySplayTreeMap { 
-                    entries = reverse then descendingEntries(from,to) 
-                                      else ascendingEntries(from,to);
-                    compare(KeyElement x, KeyElement y) 
-                            => reverse then compare(y,x)
-                                       else compare(x,y); 
-    };
-
-    shared actual TernarySplayTreeMap<KeyElement,Item> spanFrom(Key from)
-            => TernarySplayTreeMap(higherEntries(from), compare);
-
-    shared actual TernarySplayTreeMap<KeyElement,Item> spanTo(Key to)     
-            => TernarySplayTreeMap(
-                    takeWhile((entry) => compareKeys(entry.key,to) != larger), 
-                    compare);
-
+    shared actual TernarySplayTreeMap<KeyElement, Item> createAnotherMap(
+        {<Key->Item>*} entries,
+        Comparison(KeyElement, KeyElement) compare)
+            => TernarySplayTreeMap(entries, compare);
+    
     shared actual TernarySplayTreeMap<KeyElement, Item> clone() 
             => copy(this);
     
     shared actual Boolean equals(Object that)
-            => (super of TernaryTreeMap<KeyElement, Item>).equals(that);
+            => (super of Map<Key, Item>).equals(that);
     
     shared actual Integer hash
-            => (super of TernaryTreeMap<KeyElement, Item>).hash;
+            => (super of Map<Key, Item>).hash;
 }

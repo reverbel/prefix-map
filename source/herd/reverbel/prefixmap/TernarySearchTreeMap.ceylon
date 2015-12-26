@@ -69,7 +69,6 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
     
-    
     Node newVerticalPath(Node? parent, Key key, Item item) {
         variable KeyElement e = key.first;
         variable KeyElement[] rest = key.rest;
@@ -347,34 +346,17 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     shared actual void clear()
             => root = null;
     
-    shared actual TernarySearchTreeMap<KeyElement,Item> measure(Key from, 
-                                                          Integer length)
-            => TernarySearchTreeMap(higherEntries(from).take(length), compare);
-    
-    shared actual TernarySearchTreeMap<KeyElement,Item> span(Key from, Key to)
-            => let (reverse = compareKeys(from,to)==larger)
-                TernarySearchTreeMap { 
-                    entries = reverse then descendingEntries(from,to) 
-                                      else ascendingEntries(from,to);
-                    compare(KeyElement x, KeyElement y) 
-                            => reverse then compare(y,x)
-                                       else compare(x,y); 
-    };
-    
-    shared actual TernarySearchTreeMap<KeyElement,Item> spanFrom(Key from)
-            => TernarySearchTreeMap(higherEntries(from), compare);
-    
-    shared actual TernarySearchTreeMap<KeyElement,Item> spanTo(Key to)     
-            => TernarySearchTreeMap(
-                    takeWhile((entry) => compareKeys(entry.key,to) != larger), 
-                    compare);
+    shared actual TernarySearchTreeMap<KeyElement, Item> createAnotherMap(
+        {<Key->Item>*} entries,
+        Comparison(KeyElement, KeyElement) compare)
+            => TernarySearchTreeMap(entries, compare);
     
     shared actual TernarySearchTreeMap<KeyElement, Item> clone() 
             => copy(this);
     
     shared actual Boolean equals(Object that)
-            => (super of TernaryTreeMap<KeyElement, Item>).equals(that);
+            => (super of Map<Key, Item>).equals(that);
 
     shared actual Integer hash
-            => (super of TernaryTreeMap<KeyElement, Item>).hash;
+            => (super of Map<Key, Item>).hash;
 }

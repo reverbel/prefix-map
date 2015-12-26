@@ -123,9 +123,9 @@ class TreeNode<KeyElement, Item>(element)
    tree map implementations [[TernarySearchTreeMap]] and
    [[TernarySplayTreeMap]]. In order to satisfy the [[TernaryTreeMap]]
    interface, a concrete class must provide actual implementations for 
-   the formal attributes [[rootNode]] and [[compare]] and for the 
-   formal methods [[search]], [[put]], [[remove]], [[measure]], 
-   [[span]], [[spanFrom]], [[spanTo]], and [[clone]]."""
+   the formal attributes [[rootNode]] and [[compare]], as well as for the 
+   formal methods [[search]], [[put]], [[remove]], [[createAnotherMap]], 
+   [[clone]], [[equals]], and [[hash]]."""
 see (`interface PrefixMap`, `interface Map`, 
     `class Entry`, `interface Comparable`,
      `class TreeNode`, `class TernarySearchTreeMap`, 
@@ -156,6 +156,20 @@ shared interface TernaryTreeMap<KeyElement, Item>
     
     "A comparator function used to sort the key elements."
     shared formal Comparison(KeyElement, KeyElement) compare;
+    
+    "Factory method that creates another `TernaryTreeMap` with the given
+     `entries` and the comparator function specified by the parameter 
+     `compare`." 
+    shared formal TernaryTreeMap<KeyElement, Item> createAnotherMap(
+        "The initial entries in the new map. If `entries` is absent,
+         an empty map will be created. "
+        {<Key->Item>*} entries = {},
+        "A function used to compare key elements.
+         If `compare` is absent, the comparator method of interface
+         [[Comparable]] will be used to compare `KeyElement`s."
+        Comparison(KeyElement, KeyElement) compare = 
+                (KeyElement x, KeyElement y) => x.compare(y)        
+    );
     
     "Determines if this map is empty, that is, if it has no entries."
     shared actual default Boolean empty 
@@ -645,13 +659,6 @@ shared interface TernaryTreeMap<KeyElement, Item>
     shared actual Integer size 
             => root?.size else 0;
     
-    shared actual default Boolean equals(Object that) 
-            => (super of Map<Key,Item>).equals(that);
-    
-    shared actual default Integer hash 
-            => (super of Map<Key,Item>).hash;
-
-
     "Returns the node with the largest element less than or equal to `e`
      within the _binary_ subtree rooted at the given `node`, or `null` if 
      all the nodes of that subtree have elements greater than `e`."
@@ -924,7 +931,6 @@ shared interface TernaryTreeMap<KeyElement, Item>
                 if (node exists) {
                     keyAccumulator.deleteLast();
                 }
-                //print("--> ``keyAccumulator``");
                 iterator() => ReverseEntryIterator(keyAccumulator, node);
             };
     
@@ -938,13 +944,27 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => lowerEntries(from).takeWhile((entry) 
                 => compareKeys(entry.key,to)!=smaller);
     
-    //shared actual formal TernaryTreeMap<KeyElement,Item> measure(Key from, Integer length);
+    shared actual TernaryTreeMap<KeyElement,Item> measure(Key from, 
+                                                          Integer length)
+            => createAnotherMap(higherEntries(from).take(length), compare);
     
-    //shared actual formal TernaryTreeMap<KeyElement,Item> span(Key from, Key to);
+    shared actual TernaryTreeMap<KeyElement,Item> span(Key from, Key to)
+            => let (reverse = compareKeys(from,to)==larger)
+                createAnotherMap { 
+                    entries = reverse then descendingEntries(from,to) 
+                                      else ascendingEntries(from,to);
+                    compare(KeyElement x, KeyElement y) 
+                            => reverse then compare(y,x)
+                                       else compare(x,y); 
+                };
     
-    //shared actual formal TernaryTreeMap<KeyElement,Item> spanFrom(Key from);
+    shared actual TernaryTreeMap<KeyElement,Item> spanFrom(Key from)
+            => createAnotherMap(higherEntries(from), compare);
     
-    //shared actual formal<KeyElement,Item> spanTo(Key to);
+    shared actual TernaryTreeMap<KeyElement,Item> spanTo(Key to)     
+            => createAnotherMap(
+                    takeWhile((entry) => compareKeys(entry.key,to) != larger), 
+                    compare);
     
     void printSubtree(Node? n) {
         if (exists n) {
