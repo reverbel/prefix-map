@@ -6,7 +6,8 @@ that provides general-purpose maps with support to prefix queries.
 The module defines the following interfaces:
    
 - [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/PrefixMap.type.html), 
-  an immutable `SortedMap` that supports prefix queries;
+  an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
+  that supports prefix queries;
 - [`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/TernaryTreeMap.type.html), 
   a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/PrefixMap.type.html) 
   backed by a ternary search tree.
@@ -53,11 +54,8 @@ that developed and analysed splay trees. Both varieties of splay trees use
 the same reestructuring heuristic and their operations have similar amortized
 time bounds. 
 
-[sleator-tarjan]: http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf 
-                  "Self-Adjusting Binary Search Trees"
+[sleator-tarjan]: http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf "Self-Adjusting Binary Search Trees"
 
-[bentley-sedgewick]: https://www.cs.princeton.edu/~rs/strings/paper.ps
-                     "Fast Algorithms for Sorting and Searching Strings"
+[bentley-sedgewick]: https://www.cs.princeton.edu/~rs/strings/paper.ps "Fast Algorithms for Sorting and Searching Strings"
 
-[ternary-search-trees]: http://www.drdobbs.com/database/ternary-search-trees/184410528
-                        "Ternary Search Trees
+[ternary-search-trees]: http://www.drdobbs.com/database/ternary-search-trees/184410528 "Ternary Search Trees"
