@@ -34,10 +34,9 @@
    of Splaying", starting at the bottom of page 674 and going up to the
    first paragraph of page 676. (Sleator and Tarjan do not mention "ternary
    search trees", they use the term "lexicographic search tree".) For a 
-   longer discussion, see Bentley and Sedgewick's paper "Fast Algorithms
-   for Sorting and Searching Strings", available [here][bentley-sedgewick],
-   or their article "Ternary Search Trees"
-   [in Dr. Dobb's][ternary-search-trees].
+   longer discussion, see Bentley and Sedgewick's paper ["Fast Algorithms
+   for Sorting and Searching Strings"][bentley-sedgewick], or their article
+   "Ternary Search Trees" [in Dr. Dobb's][ternary-search-trees].
    
    A _ternary splay tree_, also known as a _lexicographic splay tree_, is
    a self-adjusting form of ternary search tree. Ternary splay trees
