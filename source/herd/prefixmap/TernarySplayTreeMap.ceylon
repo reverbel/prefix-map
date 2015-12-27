@@ -8,7 +8,7 @@
 
  Ternary splay trees are also known as _lexicographic splay trees_.
  For information on such trees, see the documentation of module 
- [`herd.reverbel.prefixmap`](index.html)."
+ [`herd.prefixmap`](index.html)."
 see (`interface PrefixMap`, `interface Map`, 
     `class Entry`, `interface Comparable`,
     `interface TernaryTreeMap`)

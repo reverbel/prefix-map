@@ -10,7 +10,7 @@ class MutableBox<Item>(shared variable Item? content) {}
  
  Ternary search trees are also known as _lexicographic search trees_.
  For information on such trees, see the documentation of module 
- [`herd.reverbel.prefixmap`](index.html)."
+ [`herd.prefixmap`](index.html)."
 see (`interface PrefixMap`, `interface Map`, 
      `class Entry`, `interface Comparable`,
      `interface TernaryTreeMap`)

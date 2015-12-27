@@ -1,4 +1,4 @@
-import herd.reverbel.prefixmap { TernarySearchTreeMap, TernarySplayTreeMap }
+import herd.prefixmap { TernarySearchTreeMap, TernarySplayTreeMap }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
 import ceylon.file { ... }
