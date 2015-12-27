@@ -31,8 +31,8 @@ The keys in this tree are the words "as", "at", "bat", "bats", "bog",
 "boy", "caste", "cats", "day", "dogs", "donut", and "door". Squares
 denote terminal nodes. A terminal node contains the last element of
 a key. It also contains the item (not shown) associated with the key.
-   
-<img src="http://www.ime.usp.br/~reverbel/Images/ternary-search-tree.png">
+
+![Ternary search tree image](http://www.ime.usp.br/~reverbel/Images/ternary-search-tree.png "Ternary search tree example")
      
 For a very short, formal and precise definition of ternary search tree, 
 see pages 674-676 of Sleator and Tarjan's paper ["Self-Adjusting Binary 
@@ -45,12 +45,12 @@ see Bentley and Sedgewick's paper ["Fast Algorithms for Sorting and
 Searching Strings"][bentley-sedgewick], or their article "Ternary Search
 Trees" [in Dr. Dobb's][ternary-search-trees].
    
-A _ternary splay tree_, also known as a _lexicographic splay tree_, is
-a self-adjusting form of ternary search tree. Ternary splay trees
-are an extension of Sleator and Tarjan's plain (binary) _splay trees_,
-and were first presented in [the same (aforementioned) paper][sleator-tarjan]
-that developed and analyzed splay trees. Both varieties of splay trees use 
-the same restructuring heuristic and have operations with similar amortized
+A _ternary splay tree_, also known as _lexicographic splay tree_, is a
+self-adjusting form of ternary search tree. Ternary splay trees are an
+extension of Sleator and Tarjan's plain (binary) _splay trees_, and were
+first presented in [the same (aforementioned) paper][sleator-tarjan] that
+developed and analyzed splay trees. Both varieties of splay trees use the
+same restructuring heuristic and have operations with similar amortized
 time bounds. 
 
 [sleator-tarjan]: http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf "Self-Adjusting Binary Search Trees"

@@ -113,7 +113,7 @@ class TreeNode<KeyElement, Item>(element)
    function. The [[TernaryTreeMap]] implementations in this package 
    provide a default `compare` function based on the "natural" 
    comparison of key elements. (The default function merely delegates
-   its task to the [[KeyElement]]s themselves, which are [[Comparable]]).  
+   its task to the [[KeyElement]]s themselves, which are [[Comparable]]).
    Moreover, these [[TernaryTreeMap]] implementations also accept
    client-defined comparison functions, for example to specify a 
    character ordering that groups together uppercase and lowercase 
