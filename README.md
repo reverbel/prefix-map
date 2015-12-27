@@ -1,7 +1,6 @@
 # prefix-map
 
-[Ceylon module](http://www.ime.usp.br/~reverbel/prefix-map/api/) 
-that provides general-purpose maps with support to prefix queries.
+** [Ceylon module](http://www.ime.usp.br/~reverbel/prefix-map/api/) that provides general-purpose maps with support to prefix queries **
    
 The module defines the following interfaces:
    
