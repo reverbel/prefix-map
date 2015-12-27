@@ -27,7 +27,7 @@
    
    <img src="http://www.ime.usp.br/~reverbel/Images/ternary-search-tree.png">
      
-   For a very short, formal and precise definition of ternary such tree, 
+   For a very short, formal and precise definition of ternary search tree, 
    see pages 674-676 of Sleator and Tarjan's paper "Self-Adjusting Binary 
    Search Trees", available [here][sleator-tarjan], from which the image
    above was taken. The relevant part is in section 6, "Two Applications 
