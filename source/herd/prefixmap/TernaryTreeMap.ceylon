@@ -144,8 +144,8 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => TreeNode<KeyElement, Item>(element);
     
     "An object that is the root node of the tree, or `null` in the case 
-     of an empty tree. __This attribute is not intended for use by client
-     code.__ Its purpose is merely to serve as a \"hook\" through which
+     of an empty tree. _This attribute is not intended for use by client
+     code._ Its purpose is merely to serve as a \"hook\" through which
      methods actually defined by interface [[TernaryTreeMap]] have access
      to the root object provided by a concrete [[TernaryTreeMap]]
      implementation.
@@ -185,8 +185,8 @@ shared interface TernaryTreeMap<KeyElement, Item>
 
     //shared actual formal Item? remove(Key key);
     
-    "Searches for a `key` in this ternary tree. __This method is not intended
-     for use by client code.__ Its purpose is merely to serve as a \"hook\" 
+    "Searches for a `key` in this ternary tree. _This method is not intended
+     for use by client code._ Its purpose is merely to serve as a \"hook\" 
      through which methods actually defined by interface [[TernaryTreeMap]]
      have access to search functionality provided by a concrete
      [[TernaryTreeMap]] implementation. 
