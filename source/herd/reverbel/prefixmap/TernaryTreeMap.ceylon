@@ -194,11 +194,11 @@ shared interface TernaryTreeMap<KeyElement, Item>
      A call to [[search]] returns either the last node of a middle path 
      with the sequence of elements of the given `key`, or `null` if there 
      is no such middle path. A node returned by `search` is not necessarily
-     terminal. If `tree.search(key)` returns a terminal node, then the given
-     `key` is actually present in the tree, and the returned node contains the item associated with that key. If 
-     `tree.search(key)` returns a non-terminal node, then the given `key`
-     appears only as a prefix of some key in the tree, and there is no 
-     item associated with `key`.
+     terminal. If `tree.search(key)` returns a terminal node, then `key` is
+     actually present in the tree, and the returned node contains the item
+     associated with `key`. If `tree.search(key)` returns a non-terminal
+     node, `key` appears only as a prefix of some key in the tree, and there
+     is no item associated with `key`.
 
      In order to search for a key in this map, client code should use the
      method [[lookup]] instead."

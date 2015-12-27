@@ -69,6 +69,13 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
     
+    "Links to the given `parent` node a vertical chain of middle descendents
+     containing the elements of the given `key`. The first element of `key`
+     gets stored in a newly created node that becomes middle child of
+     `parent`, the second element (if it exists) gets stored in a newly
+     created node that becomes middle grandchild of `parent`, and so on.
+     The given `item` gets stored in the last node of the vertical chain,
+     which is marked as a terminal node."
     Node newVerticalPath(Node? parent, Key key, Item item) {
         variable KeyElement e = key.first;
         variable KeyElement[] rest = key.rest;
