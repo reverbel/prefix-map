@@ -27,7 +27,7 @@ is a kind of prefix tree whose nodes contain key elements, rather
 than complete keys. 
    
 The figure below shows a ternary search tree whose keys are sequences 
-of characteres. Each node contain one element (a character) of a key.
+of characters. Each node contain one element (a character) of a key.
 The keys in this tree are the words "as", "at", "bat", "bats", "bog",
 "boy", "caste", "cats", "day", "dogs", "donut", and "door". Squares
 denote terminal nodes. A terminal node contains the last element of
