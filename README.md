@@ -1,25 +1,25 @@
 # prefix-map
 
-[Ceylon module](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/) 
+[Ceylon module](http://www.ime.usp.br/~reverbel/prefix-map/api/) 
 that provides general-purpose maps with support to prefix queries.
    
 The module defines the following interfaces:
    
-- [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/PrefixMap.type.html), 
+- [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html), 
   an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
   that supports prefix queries;
-- [`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/TernaryTreeMap.type.html), 
-  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/PrefixMap.type.html) 
+- [`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernaryTreeMap.type.html), 
+  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html) 
   backed by a ternary search tree.
      
-[`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/TernaryTreeMap.type.html)
+[`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernaryTreeMap.type.html)
 is an abstract supertype for the following concrete implementations:
    
-- [`TernarySearchTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/TernarySearchTreeMap.type.html), 
-  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/PrefixMap.type.html)
+- [`TernarySearchTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernarySearchTreeMap.type.html), 
+  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html)
   based on a ternary search tree;  
-- [`TernarySplayTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/TernarySplayTreeMap.type.html), 
-  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map-0.0.1-doc/api/PrefixMap.type.html)
+- [`TernarySplayTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernarySplayTreeMap.type.html), 
+  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html)
   based on a ternary splay tree.
      
 A _ternary search tree_, also known as a _lexicographic search tree_,
