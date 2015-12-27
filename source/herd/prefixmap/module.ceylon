@@ -2,7 +2,8 @@
    
    This module defines the following interfaces:
    
-   - [[PrefixMap]], an immutable `SortedMap` that supports prefix queries;
+   - [[PrefixMap]], an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
+     that supports prefix queries;
    - [[TernaryTreeMap]], a mutable [[PrefixMap]] backed by a ternary search
      tree.
      
@@ -25,7 +26,7 @@
    denote terminal nodes. A terminal node contains the last element of
    a key. It also contains the item (not shown) associated with the key.
    
-   <img src="http://www.ime.usp.br/~reverbel/Images/ternary-search-tree.png">
+   ![Ternary search tree image](https://raw.githubusercontent.com/reverbel/prefix-map/master/doc/resources/ternary-search-tree.png "Ternary search tree example")
      
    For a very short, formal and precise definition of ternary search tree, 
    see pages 674-676 of Sleator and Tarjan's paper "Self-Adjusting Binary 

@@ -1,24 +1,24 @@
 # prefix-map
 
-__[Ceylon module](http://www.ime.usp.br/~reverbel/prefix-map/api/) that provides general-purpose maps with support to prefix queries__
+__[Ceylon module](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/) that provides general-purpose maps with support to prefix queries__
    
 The module defines the following interfaces:
    
-- [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html), 
+- [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/PrefixMap.type.html), 
   an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
   that supports prefix queries;
-- [`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernaryTreeMap.type.html), 
-  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html) 
+- [`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/TernaryTreeMap.type.html), 
+  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/PrefixMap.type.html) 
   backed by a ternary search tree.
      
-[`TernaryTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernaryTreeMap.type.html)
+[`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/TernaryTreeMap.type.html)
 is an abstract supertype for the following concrete implementations:
    
-- [`TernarySearchTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernarySearchTreeMap.type.html), 
-  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html)
+- [`TernarySearchTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/TernarySearchTreeMap.type.html), 
+  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/PrefixMap.type.html)
   based on a ternary search tree;  
-- [`TernarySplayTreeMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/TernarySplayTreeMap.type.html), 
-  a mutable [`PrefixMap`](http://www.ime.usp.br/~reverbel/prefix-map/api/PrefixMap.type.html)
+- [`TernarySplayTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/TernarySplayTreeMap.type.html), 
+  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.2/module-doc/api/PrefixMap.type.html)
   based on a ternary splay tree.
      
 A _ternary search tree_, also known as a _lexicographic search tree_,
@@ -32,7 +32,7 @@ The keys in this tree are the words "as", "at", "bat", "bats", "bog",
 denote terminal nodes. A terminal node contains the last element of
 a key. It also contains the item (not shown) associated with the key.
 
-![Ternary search tree image](http://www.ime.usp.br/~reverbel/Images/ternary-search-tree.png "Ternary search tree example")
+![Ternary search tree image](https://raw.githubusercontent.com/reverbel/prefix-map/master/doc/resources/ternary-search-tree.png "Ternary search tree example")
      
 For a very short, formal and precise definition of ternary search tree, 
 see pages 674-676 of Sleator and Tarjan's paper ["Self-Adjusting Binary 
