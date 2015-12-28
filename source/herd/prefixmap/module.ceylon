@@ -56,6 +56,6 @@
    [ternary-search-trees]: http://www.drdobbs.com/database/ternary-search-trees/184410528
                            "Ternary Search Trees" """ 
 by ("Francisco Reverbel")
-module herd.prefixmap "0.0.2" {
+module herd.prefixmap "0.0.3" {
     shared import ceylon.collection "1.2.0";
 }
