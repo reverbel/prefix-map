@@ -1,5 +1,22 @@
 import ceylon.collection { SortedMap }
 
+"Converts a non-empty `String` in `Character` sequence."
+shared [Character+] toSequence(String nonEmptyString) {
+    value seq = nonEmptyString.sequence();
+    "parameter `nonEmptyString` is supposed to be a non-empty String"
+    assert (nonempty seq);
+    return seq; 
+}
+
+"Converts a non-empty `Character` sequence in `String`."
+shared String toString([Character+] charSeq) {
+    value strBuilder = StringBuilder();
+    for (c in charSeq) {
+        strBuilder.appendCharacter(c);
+    }
+    return strBuilder.string;
+}
+
 "A [[SortedMap]] whose keys are sequences of [[Comparable]] elements.
  `PrefixMap` supports the following prefix queries:
  - Does the map contain some [[Entry]] whose key has a given prefix?

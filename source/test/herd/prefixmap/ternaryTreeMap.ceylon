@@ -1,23 +1,10 @@
-import herd.prefixmap { TernarySearchTreeMap, TernarySplayTreeMap }
+import herd.prefixmap { TernarySearchTreeMap,
+                        TernarySplayTreeMap,
+                        toSequence, 
+                        toString }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
 import ceylon.file { ... }
-
-[Character+] toSequence(String nonEmptyString) {
-    //value seq = [ for (c in nonEmptyString) c ];
-    value seq = nonEmptyString.sequence();
-    "parameter `nonEmptyString` is supposed to be a non-empty String"
-    assert (nonempty seq);
-    return seq; 
-}
-
-String toString([Character+] charSeq) {
-    value strBuilder = StringBuilder();
-    for (c in charSeq) {
-        strBuilder.appendCharacter(c);
-    }
-    return strBuilder.string;
-}
 
 shared test void testEmptyTernaryTreeMap() {
     value map = TernarySearchTreeMap<Character, Integer>();
