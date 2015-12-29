@@ -61,7 +61,7 @@ class TernaryTreeMapWrapper<Item>(TernaryTreeMap<Character, Item> innerMap)
                 else null;
     
     shared actual Item? get(Object key) 
-            => if (is String key) then innerMap.get(toSequence(key)) else null;
+            => if (is String key) then innerMap.getByIterableKey(key) else null;
     
     shared actual <String->Item>? last
             => let (innerLast = innerMap.last)

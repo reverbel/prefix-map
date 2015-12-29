@@ -189,6 +189,37 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     
     shared actual Object? search(Key key)
             => recursiveSearch(key, root);
+
+    shared actual Object? searchByIterableKey(IterableKey key)
+    {
+        variable Node? node = root;
+        Iterator<KeyElement> it = key.iterator();
+        "a key must be non-empty"
+        assert (is KeyElement firstElement = it.next());
+        variable KeyElement element = firstElement;
+        while (exists n = node) {
+            switch (compare(element, n.element))
+            case (smaller) {
+                node = n.left;
+            }
+            case (larger) {
+                node = n.right;
+            }
+            case (equal) {
+                value next = it.next();
+                if (is KeyElement next) {
+                    node = n.middle;
+                    element = next;
+                } 
+                else {
+                    // we have just looked at the last element of `key`,
+                    // and it matched the element in `node`
+                    return if (n.terminal) then n else null;
+                }
+            }
+        }
+        return null;
+    }
     
    /*
     //Iterative version of lookup

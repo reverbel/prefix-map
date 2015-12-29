@@ -23,6 +23,10 @@ shared interface PrefixMap<KeyElement, out Item>
      sequence of `KeyElement`s. (`Key` is an alias for `[KeyElement+]`.)"
     shared interface Key => [KeyElement+];
     
+    "The type of the \"iterable form\" of a key. Some methods receive 
+     a key parameter in iterable form."
+    shared interface IterableKey => Iterable<KeyElement>;
+    
     "Returns `true` if this map has a key with the given prefix, or
      `false` otherwise."
     shared formal Boolean hasKeyWithPrefix(Object prefix);

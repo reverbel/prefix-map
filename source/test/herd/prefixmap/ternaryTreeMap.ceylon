@@ -461,7 +461,8 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
 }
 
 shared test void testMultipleEntryTernaryTreeDictionary() {
-    value map = TernarySplayTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, Integer>();
+    //value map = TernarySplayTreeMap<Character, Integer>();
     value dict = wrapAsDictionary(map);
     variable Integer? n;
     
