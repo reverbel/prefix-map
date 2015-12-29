@@ -7,23 +7,23 @@ The module defines the following interfaces:
 - [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/PrefixMap.type.html), 
   an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
   that supports prefix queries and is keyed by non-empty sequences of
-  [[Comparable]] objects;
+  `Comparable` objects;
 - [`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/TernaryTreeMap.type.html), 
   a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/PrefixMap.type.html) 
   backed by a ternary search tree.
 - [`PrefixDictionary`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/PrefixDictionary.type.html), 
   an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
-  that supports prefix queries and is keyed by non-empty [[String]] 
+  that supports prefix queries and is keyed by non-empty `String` 
   instances;
 - [`TernaryTreeDictionary`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/TernaryTreeDictionary.type.html), 
   a mutable [`PrefixDictionary`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/PrefixMap.type.html) 
   backed by a ternary search tree.
      
-The last two interfaces are useful when we want keys to be [[String]]
-instances, rather than `[`[[Character]]`+]` instances. (In Ceylon,
-[[String]] is not a subtype of [[Character]]`[]`.) This module
+The last two interfaces are useful when we want keys to be `String`
+instances, rather than `[Character+]` instances. (In Ceylon,
+`String` is not a subtype of `Character[]`.) This module
 implements [[TernaryTreeDictionary]] instances as objects that wrap
-[[TernaryTreeMap]] instances keyed by [[Character]] sequences.
+[[TernaryTreeMap]] instances keyed by `Character` sequences.
    
 [`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/TernaryTreeMap.type.html)
 is an abstract supertype for the following concrete implementations:
