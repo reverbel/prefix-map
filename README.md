@@ -1,6 +1,6 @@
 # prefix-map
 
-__[Ceylon module](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/) that provides general-purpose maps with support to prefix queries__
+__[Ceylon module](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/index.html) that provides general-purpose maps with support to prefix queries__
    
 The module defines the following interfaces:
    
