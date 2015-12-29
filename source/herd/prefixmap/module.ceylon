@@ -8,7 +8,8 @@
    - [[TernaryTreeMap]], a mutable [[PrefixMap]] backed by a ternary search
      tree;
    - [[PrefixDictionary]], an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
-     that supports prefix queries is keyed by non-empty [[String]] instances;
+     that supports prefix queries and is keyed by non-empty [[String]] 
+     instances;
    - [[TernaryTreeDictionary]], a mutable [[PrefixDictionary]] backed by a 
      ternary search tree.
      
