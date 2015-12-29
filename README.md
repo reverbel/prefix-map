@@ -22,8 +22,8 @@ The module defines the following interfaces:
 The last two interfaces are useful when we want keys to be `String`
 instances, rather than `[Character+]` instances. (In Ceylon,
 `String` is not a subtype of `Character[]`.) This module
-implements [[TernaryTreeDictionary]] instances as objects that wrap
-[[TernaryTreeMap]] instances keyed by `Character` sequences.
+implements [`TernaryTreeDictionary`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/TernaryTreeDictionary.type.html) instances as objects that wrap
+[`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/TernaryTreeMap.type.html) instances keyed by `Character` sequences.
    
 [`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.3/module-doc/api/TernaryTreeMap.type.html)
 is an abstract supertype for the following concrete implementations:
