@@ -21,10 +21,10 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         given KeyElement satisfies Comparable<KeyElement> {
     
     "A node of this tree. `Node` is a convenient alias for
-     `TreeNode<KeyElement, Item>`."
-    see (`class TreeNode`)
+     `TernaryTreeNode<KeyElement, Item>`."
+    see (`class TernaryTreeNode`)
     class Node(KeyElement element) 
-            => TreeNode<KeyElement, Item>(element);
+            => TernaryTreeNode<KeyElement, Item>(element);
      
     "The root node of the tree."
     variable Node? root = null;

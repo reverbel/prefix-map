@@ -1,7 +1,8 @@
 import herd.prefixmap { TernarySearchTreeMap,
                         TernarySplayTreeMap,
                         toSequence, 
-                        toString }
+                        toString,
+                        wrapAsDictionary }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
 import ceylon.file { ... }
@@ -458,3 +459,49 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
         print("input file does not exist");
     }
 }
+
+shared test void testMultipleEntryTernaryTreeDictionary() {
+    value map = TernarySplayTreeMap<Character, Integer>();
+    value dict = wrapAsDictionary(map);
+    variable Integer? n;
+    
+    value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
+    for (str in strings) {
+        n = dict.put(str, str.size);
+        print(n);
+        print(dict);
+    }
+    value originalDict = dict.clone();
+    assertEquals(dict, originalDict);
+    assertEquals(dict.hash, originalDict.hash);
+    
+    n = dict.remove("cast");
+    print(n);
+    print(dict);
+    
+    //n = dict.remove(toSequence("caste"));
+    n = dict.remove("cats");
+    print(n);
+    print(dict);
+    
+    print("will remove \"donut\" -------------------------------------------");
+    n = dict.remove("donut");
+    print(n);
+    print(dict);
+    
+    print("will remove \"day\" ---------------------------------------------");
+    n = dict.remove("day");
+    print(n);
+    print(dict);
+    
+    print("will remove \"caste\" -------------------------------------------");
+    n = dict.remove("caste");
+    print(n);
+    print(dict);
+    
+    print(if (dict != originalDict) then "dict changed" else "");
+    print(originalDict);
+    print(originalDict.size);
+    
+}
+
