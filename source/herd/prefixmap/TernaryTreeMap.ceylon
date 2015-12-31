@@ -800,14 +800,20 @@ shared interface TernaryTreeMap<KeyElement, Item>
     "Lexicographically compares two keys. Returns `smaller` if `key1 < key2`, 
      `equal` if `key1 == key2`, and `larger` if `key1 > key2`."
     shared Comparison compareKeys(Key key1, Key key2){
-        variable Comparison result = compare(key1.first, key2.first);
         variable Key k1 = key1;
         variable Key k2 = key2;
-        while (result != equal, 
-               nonempty r1 = k1.rest, 
-               nonempty r2 = k2.rest) {
-            k1 = r1;
-            k2 = r2;
+        variable Comparison result = compare(key1.first, key2.first);
+        while (result == equal) {
+            value r1 = k1.rest;
+            value r2 = k2.rest;
+            if (nonempty r1, nonempty r2) {
+                k1 = r1;
+                k2 = r2;
+                result = compare(k1.first, k2.first);                
+            }
+            else {
+                break;
+            }
         }
         return (if (result != equal)  then result 
                 else if (k2.rest nonempty) then smaller
