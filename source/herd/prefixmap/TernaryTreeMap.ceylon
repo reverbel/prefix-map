@@ -22,12 +22,14 @@ import ceylon.collection {
    - `Key` instances must be streams of [[Comparable]] elements, and
    - an empty `Key` instance (a stream with no elements) is not a valid 
      key.
-   The map stores `Key` instances in "disassembled form": each node of
-   underlying ternary tree contains a key element, not a complete  
+     
+   The map stores `Key` instances in "disassembled form". Each node of
+   underlying ternary tree contains a key element, not a complete
    key. For this reason, [[TernaryTreeMap]] needs a way of converting a 
-   non-empty stream of key elements into a complete key. This is the purpose 
-   of the "key assembly function" `toKey`, a formal [[TernaryTreeMap]] 
-   attribute to be defined by concrete implementations of this interface.
+   non-empty stream of key elements into a `Key` instance. This is the
+   purpose of the "key assembly function" `toKey`, a formal
+   [[TernaryTreeMap]] attribute to be defined by concrete implementations
+   of this interface.
       
    [[TernaryTreeMap]] is an abstract supertype for the concrete ternary
    tree map implementations [[TernarySearchTreeMap]] and
