@@ -58,7 +58,7 @@ shared void run() {
             print("``t.float / (1000 * count)`` milliseconds");
         }
         try (reader = inputFile.Reader()) {
-            value map = TernarySearchTreeMap<Character, Integer>();
+            value map = TernarySearchTreeMap<Character, String, Integer>(toString);
             value keysToSearch = ArrayList<String>();
             while (exists word = reader.readLine()) { 
                 map.put(word, word.size);
@@ -68,7 +68,7 @@ shared void run() {
             measureSearchTime(map, keysToSearch, 10);
         }
         try (reader = inputFile.Reader()) {
-            value map = TernarySplayTreeMap<Character, Integer>();
+            value map = TernarySplayTreeMap<Character, String, Integer>(toString);
             value keysToSearch = ArrayList<String>();
             while (exists word = reader.readLine()) { 
                 map.put(word, word.size);

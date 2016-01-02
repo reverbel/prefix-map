@@ -14,9 +14,10 @@ see (`interface PrefixMap`, `interface Map`,
     `interface TernaryTreeMap`)
 tagged ("Collections")
 by ("Francisco Reverbel")
-shared class TernarySplayTreeMap<KeyElement, Item> 
-        satisfies TernaryTreeMap<KeyElement, Item> 
-        given KeyElement satisfies Comparable<KeyElement> {
+shared class TernarySplayTreeMap<KeyElement, Key, Item> 
+        satisfies TernaryTreeMap<KeyElement, Key, Item> 
+        given KeyElement satisfies Comparable<KeyElement> 
+        given Key satisfies Iterable<KeyElement> {
 
     "A node of this tree. `Node` is a convenient alias for
      `TernaryTreeNode<KeyElement, Item>`."
@@ -39,6 +40,10 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     "A comparator function used to sort the entries."
     shared actual Comparison(KeyElement, KeyElement) compare;
 
+    "The key assembly function, which takes a stream of `KeyElement` 
+     instances and returns the corresponding `Key` instance."
+    shared actual Key(Iterable<KeyElement>) toKey;
+    
     variable Node? splayHeader = null;
     
     value exhaustedIterator = 
@@ -46,9 +51,12 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 next() => finished;
             };
 
-    "Create a new `TernarySplayTreeMap` with the given `entries` and
-     the comparator function specified by the parameter `compare`." 
+    "Creates a new `TernarySplayTreeMap` with the key assembly function
+     specified by the parameter `toKey`, with the given `entries` and
+     with the comparator function specified by the parameter `compare`." 
     shared new (
+        "A key assembly function to be used by this map."
+        Key(Iterable<KeyElement>) toKey,
         "The initial entries in the map. If `entries` is absent,
          an empty map will be created. "
         {<Key->Item>*} entries = {},
@@ -60,14 +68,16 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         this.entries = entries;
         nodeToClone = null;
         this.compare = compare;
+        this.toKey = toKey;
     }
 
-    "Create a new `TernarySplayTreeMap` with the same entries and 
-     comparator function as the given `TernarySplayTreeMap`."
-    shared new copy(TernarySplayTreeMap<KeyElement,Item> sourceMap) {
+    "Creates a new `TernarySplayTreeMap` with the same key assembly function,
+     entries, and comparator function as the given `TernarySplayTreeMap`."
+    shared new copy(TernarySplayTreeMap<KeyElement, Key, Item> sourceMap) {
         entries = {};
         nodeToClone = sourceMap.root;
         compare = sourceMap.compare;
+        toKey = sourceMap.toKey;
     }
 
     // initialization of root
@@ -488,12 +498,12 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     shared actual void clear()
             => root = null;
     
-    shared actual TernarySplayTreeMap<KeyElement, Item> createAnotherMap(
+    shared actual TernarySplayTreeMap<KeyElement, Key, Item> createAnotherMap(
         {<Key->Item>*} entries,
         Comparison(KeyElement, KeyElement) compare)
-            => TernarySplayTreeMap(entries, compare);
+            => TernarySplayTreeMap(toKey, entries, compare);
     
-    shared actual TernarySplayTreeMap<KeyElement, Item> clone() 
+    shared actual TernarySplayTreeMap<KeyElement, Key, Item> clone() 
             => copy(this);
     
     shared actual Boolean equals(Object that)

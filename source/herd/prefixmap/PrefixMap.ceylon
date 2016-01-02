@@ -6,11 +6,14 @@ import ceylon.collection { SortedMap }
  - Retrieve all the keys of the map that have a given prefix.
  - Retrieve all the entries in the map whose keys have a given prefix.
  
- An empty stream cannot used as a key. Whenever an empty stream appears
- in the place of a key parameter, an exception will be generated. Even
- though empty keys are disallowed, the key type is \`{KeyElement*}\`
- (rather than \`{KeyElement+}\`), in order to allow non-empty [[String]]
- instances to be used as keys."
+ Empty streams are not valid keys. An empty `Key` instance cannot be passed
+ as a `Key` parameter to any of the methods specified by this interface or
+ inherited from its superinterfaces. Whenever an empty stream appears
+ in the place of a `Key` parameter, an exception will be generated.
+ 
+ Even though empty keys are disallowed, the type `Key` is required to satisfy
+ \`{KeyElement*}\` (rather than \`{KeyElement+}\`), in order to allow 
+ non-empty [[String]] instances to be used as keys."
 see (`interface SortedMap`, 
      `interface Ranged`, 
      `interface Map`, 
@@ -18,17 +21,11 @@ see (`interface SortedMap`,
      `class Entry`)
 tagged ("Collections")
 by ("Francisco Reverbel")
-shared interface PrefixMap<KeyElement, out Item>
-        satisfies SortedMap<{KeyElement*},Item>
-                  & Ranged<{KeyElement*},
-                           {KeyElement*}->Item,
-                           PrefixMap<KeyElement,Item>>
-        given KeyElement satisfies Comparable<KeyElement> {
-    
-    "The type of the keys of this `PrefixMap`. A `Key` is a
-     stream of `KeyElement`s. Even though `Key` is an alias for
-     `{KeyElement*}`, valid keys are assumed to be non-empty."
-    shared interface Key => {KeyElement*};
+shared interface PrefixMap<KeyElement, Key, out Item>
+        satisfies SortedMap<Key, Item>
+                  & Ranged<Key, Key->Item, PrefixMap<KeyElement, Key, Item>>
+        given KeyElement satisfies Comparable<KeyElement>
+        given Key satisfies Iterable<KeyElement> {
     
     "Returns `true` if this map has a key with the given prefix, or
      `false` otherwise."

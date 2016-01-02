@@ -16,9 +16,10 @@ see (`interface PrefixMap`, `interface Map`,
      `interface TernaryTreeMap`)
 tagged ("Collections")
 by ("Francisco Reverbel")
-shared class TernarySearchTreeMap<KeyElement, Item> 
-        satisfies TernaryTreeMap<KeyElement, Item> 
-        given KeyElement satisfies Comparable<KeyElement> {
+shared class TernarySearchTreeMap<KeyElement, Key, Item> 
+        satisfies TernaryTreeMap<KeyElement, Key, Item> 
+        given KeyElement satisfies Comparable<KeyElement> 
+        given Key satisfies Iterable<KeyElement> {
     
     "A node of this tree. `Node` is a convenient alias for
      `TernaryTreeNode<KeyElement, Item>`."
@@ -41,9 +42,16 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     "A comparator function used to sort the entries."
     shared actual Comparison(KeyElement, KeyElement) compare;
     
-    "Create a new `TernarySearchTreeMap` with the given `entries` and the 
-     comparator function specified by the parameter `compare`." 
+    "The key assembly function, which takes a stream of `KeyElement` 
+     instances and returns the corresponding `Key` instance."
+    shared actual Key(Iterable<KeyElement>) toKey;
+    
+    "Creates a new `TernarySplayTreeMap` with the key assembly function
+     specified by the parameter `toKey`, with the given `entries` and
+     with the comparator function specified by the parameter `compare`." 
     shared new (
+        "A key assembly function to be used by this map."
+        Key(Iterable<KeyElement>) toKey,
         "The initial entries in the map. If `entries` is absent,
          an empty map will be created. "
         {<Key->Item>*} entries = {},
@@ -55,46 +63,22 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         this.entries = entries;
         nodeToClone = null;
         this.compare = compare;
+        this.toKey = toKey;
     }
     
-    "Create a new `TernarySearchTreeMap` with the same entries and 
-     comparator function as the given `TernarySearchTreeMap`."
-    shared new copy(TernarySearchTreeMap<KeyElement,Item> sourceMap) {
+    "Creates a new `TernarySplayTreeMap` with the same key assembly function,
+     entries, and comparator function as the given `TernarySplayTreeMap`."
+    shared new copy(TernarySearchTreeMap<KeyElement,Key, Item> sourceMap) {
         entries = {};
         nodeToClone = sourceMap.root;
         compare = sourceMap.compare;
+        toKey = sourceMap.toKey;
     }
     
     // initialization of root
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
-/*    
-    "Links to the given `parent` node a vertical chain of middle descendents
-     containing the elements produced by the given `keyIterator`, which is
-     assumed to be not exhausted. The first element produced by `keyIterator`
-     gets stored in a newly created node that becomes middle child of
-     `parent`, the second element (if it exists) gets stored in a newly 
-     created node that becomes middle grandchild of `parent`, and so on. The 
-     given `item` gets stored in the last node of the vertical chain, which
-     is marked as a terminal node."
-    Node newVerticalPath(Node? parent, KeyIterator keyIterator, Item item) {
-        assert (is KeyElement first = keyIterator.next());
-        value head = Node(first);
-        head.parent = parent;
-        variable Node node = head; 
-        while (is KeyElement e = keyIterator.next()) {
-            value newNode = Node(e);
-            newNode.parent = node;
-            node.middle = newNode;
-            node = newNode;
-        }
-        // node received the last element of the key:
-        // store item in it and mark it as terminal
-        node.item = item;
-        node.terminal = true;
-        return head;
-    }
-*/    
+    
     shared actual Item? put(Key key, Item item) {
         variable Node? node = root;
         variable Node? previousNode = null;
@@ -338,12 +322,12 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     shared actual void clear()
             => root = null;
     
-    shared actual TernarySearchTreeMap<KeyElement, Item> createAnotherMap(
+    shared actual TernarySearchTreeMap<KeyElement, Key, Item> createAnotherMap(
         {<Key->Item>*} entries,
         Comparison(KeyElement, KeyElement) compare)
-            => TernarySearchTreeMap(entries, compare);
+            => TernarySearchTreeMap(toKey, entries, compare);
     
-    shared actual TernarySearchTreeMap<KeyElement, Item> clone() 
+    shared actual TernarySearchTreeMap<KeyElement, Key, Item> clone() 
             => copy(this);
     
     shared actual Boolean equals(Object that)

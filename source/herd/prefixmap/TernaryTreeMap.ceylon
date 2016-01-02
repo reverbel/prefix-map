@@ -18,25 +18,37 @@ import ceylon.collection {
    character ordering that groups together uppercase and lowercase 
    letters.
    
+   A [[TernaryTreeMap]] places only two requirements on its keys:
+   - `Key` instances must be streams of [[Comparable]] elements, and
+   - an empty `Key` instance (a stream with no elements) is not a valid 
+     key.
+   The map stores `Key` instances in "disassembled form": each node of
+   underlying ternary tree contains a key element, not a complete  
+   key. For this reason, [[TernaryTreeMap]] needs a way of converting a 
+   non-empty stream of key elements into a complete key. This is the purpose 
+   of the "key assembly function" `toKey`, a formal [[TernaryTreeMap]] 
+   attribute to be defined by concrete implementations of this interface.
+      
    [[TernaryTreeMap]] is an abstract supertype for the concrete ternary
    tree map implementations [[TernarySearchTreeMap]] and
    [[TernarySplayTreeMap]]. In order to satisfy the [[TernaryTreeMap]]
    interface, a concrete class must provide actual implementations for 
-   the formal attributes [[rootNode]] and [[compare]], as well as for the 
-   formal methods [[search]], [[put]], [[remove]], [[createAnotherMap]], 
-   [[clone]], [[equals]], and [[hash]]."""
+   the formal attributes [[rootNode]], [[compare]], and [[toKey]], as well
+   as for the formal methods [[search]], [[put]], [[remove]], 
+   [[createAnotherMap]], [[clone]], [[equals]], and [[hash]]."""
 see (`interface PrefixMap`,
      `interface Map`, `class Entry`, `interface Comparable`,
      `class TernarySearchTreeMap`, `class TernarySplayTreeMap`)
 tagged ("Collections")
 by ("Francisco Reverbel")
-shared interface TernaryTreeMap<KeyElement, Item>
-        satisfies PrefixMap<KeyElement, Item> 
-                  & MutableMap<{KeyElement*}, Item> 
-                  & Ranged<{KeyElement*},
-                           {KeyElement*}->Item,
-                           TernaryTreeMap<KeyElement,Item>>
-        given KeyElement satisfies Comparable<KeyElement> {
+shared interface TernaryTreeMap<KeyElement, Key, Item>
+        satisfies PrefixMap<KeyElement, Key, Item> 
+                  & MutableMap<Key, Item> 
+                  & Ranged<Key, 
+                           Key->Item, 
+                           TernaryTreeMap<KeyElement, Key, Item>>
+        given KeyElement satisfies Comparable<KeyElement> 
+        given Key satisfies Iterable<KeyElement> {
     
     "A node of this tree. `Node` is a convenient alias for
      `TernaryTreeNode<KeyElement, Item>`."
@@ -58,10 +70,14 @@ shared interface TernaryTreeMap<KeyElement, Item>
     "A comparator function used to sort the key elements."
     shared formal Comparison(KeyElement, KeyElement) compare;
     
+    "The key assembly function, which takes a stream of `KeyElement` 
+     instances and returns the corresponding `Key` instance."
+    shared formal Key(Iterable<KeyElement>) toKey;
+    
     "Factory method that creates another `TernaryTreeMap` with the given
      `entries` and the comparator function specified by the parameter 
      `compare`." 
-    shared formal TernaryTreeMap<KeyElement, Item> createAnotherMap(
+    shared formal TernaryTreeMap<KeyElement, Key, Item> createAnotherMap(
         "The initial entries in the new map. If `entries` is absent,
          an empty map will be created. "
         {<Key->Item>*} entries = {},
@@ -84,7 +100,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
      `Iterator<KeyElement>`.)"
     shared interface KeyIterator => Iterator<KeyElement>;
     
-    shared actual formal TernaryTreeMap <KeyElement, Item> clone();
+    shared actual formal TernaryTreeMap <KeyElement, Key, Item> clone();
     
     //shared actual formal Item? put(Key key, Item item);
 
@@ -196,9 +212,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
         assert (terminalNode.terminal);
         "a terminal node must have an `item`"
         assert (is Item item = terminalNode.item);
-        value key =
-                [ for (e in keyPrefix) e ].withTrailing(terminalNode.element);
-        return key->item;
+        value keyElements =
+                { for (e in keyPrefix) e }.chain({ terminalNode.element });
+        return toKey(keyElements)->item;
     }
 
      class EntryIterator(keyPrefix, currentNode)
@@ -478,11 +494,12 @@ shared interface TernaryTreeMap<KeyElement, Item>
     shared actual <Key->Item>? first {
         value key = ArrayList<KeyElement>();
         if (exists node = firstTerminalNode(key, root)) {
-            "a key cannot be empty"
-            assert (nonempty k = [ for (e in key) e ]);
+            value keyElements = { for (e in key) e };
+            //"a key cannot be empty"
+            //assert (!keyElements.iterator().next() is Finished);
             "a terminal node must have an `item`"
             assert (is Item i = node.item);
-            return k->i;
+            return toKey(keyElements)->i;
         }
         else {
             return null;
@@ -492,11 +509,12 @@ shared interface TernaryTreeMap<KeyElement, Item>
     shared actual <Key->Item>? last {
         value key = ArrayList<KeyElement>();
         if (exists node = lastTerminalNode(key, root)) {
-            "a key cannot be empty"
-            assert (nonempty k = [ for (e in key) e ]);
+            value keyElements = { for (e in key) e };
+            //"a key cannot be empty"
+            //assert (!keyElements.iterator().next() is Finished);
             "a terminal node must have an `item`"
             assert (is Item i = node.item);
-            return k->i;
+            return toKey(keyElements)->i;
         }
         else {
             return null;
@@ -526,11 +544,12 @@ shared interface TernaryTreeMap<KeyElement, Item>
             // middle subtree:
             keyPrefix.add(node.element);
             if (node.terminal) {
-                "a key cannot be empty"
-                assert (nonempty k = [ for (e in keyPrefix) e ]);
+                value keyElements = { for (e in keyPrefix) e };
+                //"a key cannot be empty"
+                //assert (!keyElements.iterator().next() is Finished);
                 "a terminal node must have an `item`"
                 assert (exists i = node.item);
-                queue.add(k->i);
+                queue.add(toKey(keyElements)->i);
             }
             enumerateEntries(node.middle, keyPrefix, queue);
             keyPrefix.deleteLast();
@@ -898,11 +917,11 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => lowerEntries(from).takeWhile(
                     (entry) => compareKeys(entry.key,to) != smaller);
     
-    shared actual TernaryTreeMap<KeyElement,Item> measure(Key from, 
-                                                          Integer length)
+    shared actual TernaryTreeMap<KeyElement, Key, Item> measure(Key from, 
+                                                                Integer length)
             => createAnotherMap(higherEntries(from).take(length), compare);
     
-    shared actual TernaryTreeMap<KeyElement,Item> span(Key from, Key to)
+    shared actual TernaryTreeMap<KeyElement, Key, Item> span(Key from, Key to)
             => let (reverse = compareKeys(from,to)==larger)
                 createAnotherMap { 
                     entries = reverse then descendingEntries(from,to) 
@@ -912,10 +931,10 @@ shared interface TernaryTreeMap<KeyElement, Item>
                                        else compare(x,y); 
                 };
     
-    shared actual TernaryTreeMap<KeyElement,Item> spanFrom(Key from)
+    shared actual TernaryTreeMap<KeyElement, Key, Item> spanFrom(Key from)
             => createAnotherMap(higherEntries(from), compare);
     
-    shared actual TernaryTreeMap<KeyElement,Item> spanTo(Key to)     
+    shared actual TernaryTreeMap<KeyElement, Key, Item> spanTo(Key to)     
             => createAnotherMap(
                     takeWhile((entry) => compareKeys(entry.key,to) != larger), 
                     compare);

@@ -22,12 +22,12 @@ shared String toString({Character*} charStream) {
 }
 
 shared test void testEmptyTernaryTreeMap() {
-    value map = TernarySearchTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, String, Integer>(toString);
     assertTrue(map.empty);
 }
 
 shared test void testSingleEntryTernaryTreeMap() {
-    value map = TernarySearchTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, String, Integer>(toString);
     value key = "0123456789";
     map.put(key, key.size);
     assertFalse(map.empty);
@@ -35,10 +35,10 @@ shared test void testSingleEntryTernaryTreeMap() {
     assertTrue(map.defines(key));
     assertEquals(map.get(key), key.size);
     for (entry in map) {
-        assertEquals(entry, toSequence(key)->key.size);
+        assertEquals(entry, key->key.size);
     }
     for (k in map.keys) {
-        assertEquals(toString(k), key);
+        assertEquals(k, key);
     }
     for (i in map.items) {
         assertEquals(i, key.size);
@@ -47,12 +47,12 @@ shared test void testSingleEntryTernaryTreeMap() {
     for (c in '0'..'9') {
         keyPrefix = keyPrefix.append<Character>([c]);
         print(keyPrefix);
-        assertTrue(map.hasKeyWithPrefix(keyPrefix));
+        assertTrue(map.hasKeyWithPrefix(toString(keyPrefix)));
         for (k in map.keysWithPrefix(keyPrefix)) {
-            assertEquals(toString(k), key);
+            assertEquals(k, key);
         }
         for (entry in map.entriesWithPrefix(keyPrefix)) {
-            assertEquals(entry, toSequence(key)->key.size);
+            assertEquals(entry, key->key.size);
         }
     }
     assertFalse(map.hasKeyWithPrefix("12345"));
@@ -71,7 +71,7 @@ shared test void testSingleEntryTernaryTreeMap() {
 }
 
 shared test void testMultipleEntryTernaryTreeMap() {
-    value map = TernarySearchTreeMap<Character, Integer>();
+    value map = TernarySearchTreeMap<Character, String, Integer>(toString);
     variable Integer? n;
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
@@ -111,6 +111,7 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print(originalMap.size);
     
     value m = TernarySearchTreeMap {
+        toKey = toString;
         entries = { for (str in strings) str -> str.size };
         Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
     };
@@ -121,11 +122,11 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print(m.first);
     print(m.last);
     
-    value x15 = TernarySearchTreeMap({ "X"-> 15 });
+    value x15 = TernarySearchTreeMap(toString, { "X"-> 15 });
     print(x15.first);
     print(x15.last);
     
-    value aaa = TernarySearchTreeMap({ "a"-> 1, "ab"-> 2, "abc"-> 3});
+    value aaa = TernarySearchTreeMap(toString, { "a"-> 1, "ab"-> 2, "abc"-> 3});
     print(aaa.first);
     print(aaa.last);
 
@@ -179,7 +180,7 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print("\n");
     print("\n");
     
-    value ab = TernarySearchTreeMap({ "a"-> 1, "ab"-> 2});
+    value ab = TernarySearchTreeMap(toString, { "a"-> 1, "ab"-> 2});
     print(ab);
     print("\n");
     print("\n");
@@ -210,7 +211,7 @@ shared test void testTernaryTreeMapWithFullDictionary() {
         
         try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
                                           writer2 = outputFile2.Overwriter()) {
-            value map = TernarySearchTreeMap<Character, Integer>();
+            value map = TernarySearchTreeMap<Character, String, Integer>(toString);
             while (exists word = reader.readLine()) { 
                 map.put(word, word.size);
             }
@@ -231,7 +232,7 @@ shared test void testTernaryTreeMapWithFullDictionary() {
 }
 
 shared test void testSingleEntryTernarySplayTreeMap() {
-    value map = TernarySplayTreeMap<Character, Integer>();
+    value map = TernarySplayTreeMap<Character, String, Integer>(toString);
     value key = "0123456789";
     map.put(key, key.size);
     assertFalse(map.empty);
@@ -239,10 +240,10 @@ shared test void testSingleEntryTernarySplayTreeMap() {
     assertTrue(map.defines(key));
     assertEquals(map.get(key), key.size);
     for (entry in map) {
-        assertEquals(entry, toSequence(key)->key.size);
+        assertEquals(entry, key->key.size);
     }
     for (k in map.keys) {
-        assertEquals(toString(k), key);
+        assertEquals(k, key);
     }
     for (i in map.items) {
         assertEquals(i, key.size);
@@ -251,12 +252,12 @@ shared test void testSingleEntryTernarySplayTreeMap() {
     for (c in '0'..'9') {
         keyPrefix = keyPrefix.append<Character>([c]);
         print(keyPrefix);
-        assertTrue(map.hasKeyWithPrefix(keyPrefix));
+        assertTrue(map.hasKeyWithPrefix(toString(keyPrefix)));
         for (k in map.keysWithPrefix(keyPrefix)) {
-            assertEquals(toString(k), key);
+            assertEquals(k, key);
         }
         for (entry in map.entriesWithPrefix(keyPrefix)) {
-            assertEquals(entry, toSequence(key)->key.size);
+            assertEquals(entry, key->key.size);
         }
     }
     assertFalse(map.hasKeyWithPrefix("12345"));
@@ -275,7 +276,7 @@ shared test void testSingleEntryTernarySplayTreeMap() {
 }
 
 shared test void testTernarySplayTreeMap() {
-    value map = TernarySplayTreeMap<Character, Integer>();
+    value map = TernarySplayTreeMap<Character, String, Integer>(toString);
     variable Integer? n;
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
@@ -306,7 +307,7 @@ shared test void testTernarySplayTreeMap() {
 }
 
 shared test void testMultipleEntryTernarySplayTreeMap() {
-    value map = TernarySplayTreeMap<Character, Integer>();
+    value map = TernarySplayTreeMap<Character, String, Integer>(toString);
     variable Integer? n;
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
@@ -354,6 +355,7 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     print(originalMap.size);
     
     value m = TernarySplayTreeMap {
+        toKey = toString;
         entries = { for (str in strings) str -> str.size };
         Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
     };
@@ -364,11 +366,11 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     print(m.first);
     print(m.last);
     
-    value x15 = TernarySplayTreeMap({ "X"-> 15 });
+    value x15 = TernarySplayTreeMap(toString, { "X"-> 15 });
     print(x15.first);
     print(x15.last);
     
-    value aaa = TernarySplayTreeMap({ "a"-> 1, "ab"-> 2, "abc"-> 3});
+    value aaa = TernarySplayTreeMap(toString, { "a"-> 1, "ab"-> 2, "abc"-> 3});
     print(aaa.first);
     print(aaa.last);
     
@@ -422,7 +424,7 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     print("\n");
     print("\n");
     
-    value ab = TernarySplayTreeMap({ "a"-> 1, "ab"-> 2});
+    value ab = TernarySplayTreeMap(toString, { "a"-> 1, "ab"-> 2});
     print(ab);
     print("\n");
     print("\n");
@@ -454,7 +456,7 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
         
         try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
             writer2 = outputFile2.Overwriter()) {
-            value map = TernarySplayTreeMap<Character, Integer>();
+            value map = TernarySplayTreeMap<Character, String, Integer>(toString);
             while (exists word = reader.readLine()) {
                 map.put(word, word.size);
             }
@@ -475,8 +477,8 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
 }
 
 shared test void testMultipleEntryTernaryTree() {
-    //value map = TernarySearchTreeMap<Character, Integer>();
-    value map = TernarySplayTreeMap<Character, Integer>();
+    //value map = TernarySearchTreeMap<Character, String, Integer>(toString);
+    value map = TernarySplayTreeMap<Character, String, Integer>(toString);
     variable Integer? n;
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
