@@ -25,7 +25,7 @@ shared interface PrefixMap<KeyElement, out Item>
                            PrefixMap<KeyElement,Item>>
         given KeyElement satisfies Comparable<KeyElement> {
     
-    "The type of the keys of this `PrefixMap`. A `Key` is a  
+    "The type of the keys of this `PrefixMap`. A `Key` is a
      stream of `KeyElement`s. Even though `Key` is an alias for
      `{KeyElement*}`, valid keys are assumed to be non-empty."
     shared interface Key => {KeyElement*};
