@@ -80,6 +80,8 @@ shared interface TernaryTreeMap<KeyElement, Item>
     Node? root
             => if (is Node r = rootNode) then r else null;
     
+    "An iterator that produces `KeyElement`s. (This is an alias for 
+     `Iterator<KeyElement>`.)"
     shared interface KeyIterator => Iterator<KeyElement>;
     
     shared actual formal TernaryTreeMap <KeyElement, Item> clone();
@@ -120,18 +122,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => if (is Key key) 
                then lookup(key) exists 
                else keys.any(key.equals);
-/*    
-    shared formal Object? searchByIterableKey(IterableKey key);
-    
-    Node? lookupByIterableKey(IterableKey key)
-            => let (node = searchByIterableKey(key))
-               if (is Node node, node.terminal) then node else null; 
-    
-    shared Item? getByIterableKey(Object key)
-            => if (is IterableKey key)
-               then lookupByIterableKey(key)?.item
-               else null;
-*/
+
     "Returns the terminal node that corresponds to the first entry (in
      lexicographic order) within the subtree rooted at the given `root`,
      or `null` if that subtree is empty (i.e., if `root` does not exist).
