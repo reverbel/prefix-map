@@ -3,22 +3,11 @@
    This module defines the following interfaces:
    
    - [[PrefixMap]], an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
-     that supports prefix queries and is keyed by non-empty sequences of
-     [[Comparable]] objects;
+     that supports prefix queries and is keyed by streams of [[Comparable]]
+     objects;
    - [[TernaryTreeMap]], a mutable [[PrefixMap]] backed by a ternary search
-     tree;
-   - [[PrefixDictionary]], an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
-     that supports prefix queries and is keyed by non-empty [[String]] 
-     instances;
-   - [[TernaryTreeDictionary]], a mutable [[PrefixDictionary]] backed by a 
-     ternary search tree.
+     tree.
      
-   The last two interfaces are useful when we want keys to be [[String]]
-   instances, rather than `[`[[Character]]`+]` instances. (In Ceylon,
-   [[String]] is not a subtype of [[Character]]`[]`.) This module
-   implements [[TernaryTreeDictionary]] instances as objects that
-   wrap [[TernaryTreeMap]] instances keyed by [[Character]] sequences.
-   
    [[TernaryTreeMap]] is an abstract supertype for the following concrete
    implementations:
    
@@ -68,6 +57,6 @@
    [ternary-search-trees]: http://www.drdobbs.com/database/ternary-search-trees/184410528
                            "Ternary Search Trees" """ 
 by ("Francisco Reverbel")
-module herd.prefixmap "0.0.4" {
+module herd.prefixmap "0.0.5" {
     shared import ceylon.collection "1.2.0";
 }

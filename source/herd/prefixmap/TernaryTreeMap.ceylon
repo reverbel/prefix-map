@@ -5,7 +5,7 @@ import ceylon.collection {
 }
 
 """A mutable [[PrefixMap]] backed by a _ternary search tree_ whose 
-   keys are sequences of [[Comparable]] elements. Map entries are 
+   keys are streams of [[Comparable]] elements. Map entries are 
    mantained in lexicographic order of keys, from the smallest to 
    the largest key. The lexicographic ordering of keys relies on 
    [[KeyElement]] comparisons performed by a formal `compare`
@@ -32,9 +32,9 @@ tagged ("Collections")
 by ("Francisco Reverbel")
 shared interface TernaryTreeMap<KeyElement, Item>
         satisfies PrefixMap<KeyElement, Item> 
-                  & MutableMap<[KeyElement+], Item> 
-                  & Ranged<[KeyElement+],
-                           [KeyElement+]->Item,
+                  & MutableMap<{KeyElement*}, Item> 
+                  & Ranged<{KeyElement*},
+                           {KeyElement*}->Item,
                            TernaryTreeMap<KeyElement,Item>>
         given KeyElement satisfies Comparable<KeyElement> {
     
@@ -80,6 +80,8 @@ shared interface TernaryTreeMap<KeyElement, Item>
     Node? root
             => if (is Node r = rootNode) then r else null;
     
+    shared interface KeyIterator => Iterator<KeyElement>;
+    
     shared actual formal TernaryTreeMap <KeyElement, Item> clone();
     
     //shared actual formal Item? put(Key key, Item item);
@@ -118,7 +120,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => if (is Key key) 
                then lookup(key) exists 
                else keys.any(key.equals);
-    
+/*    
     shared formal Object? searchByIterableKey(IterableKey key);
     
     Node? lookupByIterableKey(IterableKey key)
@@ -129,7 +131,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
             => if (is IterableKey key)
                then lookupByIterableKey(key)?.item
                else null;
-
+*/
     "Returns the terminal node that corresponds to the first entry (in
      lexicographic order) within the subtree rooted at the given `root`,
      or `null` if that subtree is empty (i.e., if `root` does not exist).
@@ -147,6 +149,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
                 else { 
                     key.add(current.element);
                     if (!current.terminal) {
+                        "a non-terminal node must have a middle child"
                         assert (exists middle = current.middle);
                         current = middle;
                     }
@@ -181,6 +184,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
                         current = middle;
                     }
                     else {
+                        "a node with no middle child must be terminal"
                         assert (current.terminal);
                         return current;
                     }
@@ -197,7 +201,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
      node that contains both the last element of that key and the 
      corresponding item. Returns an `Entry` with the key and the item."
     Key->Item entry(MutableList<KeyElement> keyPrefix, Node terminalNode) {
+        "a non-terminal node cannot be passed as a parameter to `entry`"
         assert (terminalNode.terminal);
+        "a terminal node must have an `item`"
         assert (is Item item = terminalNode.item);
         value key =
                 [ for (e in keyPrefix) e ].withTrailing(terminalNode.element);
@@ -481,7 +487,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
     shared actual <Key->Item>? first {
         value key = ArrayList<KeyElement>();
         if (exists node = firstTerminalNode(key, root)) {
+            "a key cannot be empty"
             assert (nonempty k = [ for (e in key) e ]);
+            "a terminal node must have an `item`"
             assert (is Item i = node.item);
             return k->i;
         }
@@ -493,7 +501,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
     shared actual <Key->Item>? last {
         value key = ArrayList<KeyElement>();
         if (exists node = lastTerminalNode(key, root)) {
+            "a key cannot be empty"
             assert (nonempty k = [ for (e in key) e ]);
+            "a terminal node must have an `item`"
             assert (is Item i = node.item);
             return k->i;
         }
@@ -525,7 +535,9 @@ shared interface TernaryTreeMap<KeyElement, Item>
             // middle subtree:
             keyPrefix.add(node.element);
             if (node.terminal) {
+                "a key cannot be empty"
                 assert (nonempty k = [ for (e in keyPrefix) e ]);
+                "a terminal node must have an `item`"
                 assert (exists i = node.item);
                 queue.add(k->i);
             }
@@ -555,6 +567,7 @@ shared interface TernaryTreeMap<KeyElement, Item>
         if (is Key prefix, is Node node = search(prefix)) {
             value queue = ArrayList<Key->Item>();
             if (node.terminal) {
+                "a terminal node must have an `item`"
                 assert (is Item i = node.item);
                 queue.add(prefix->i);
             }
@@ -653,32 +666,47 @@ shared interface TernaryTreeMap<KeyElement, Item>
     
     "Returns the terminal node with the largest key less than or equal to
      `key` within the ternary subtree rooted at the given `node`, or `null`
-     if all the terminal nodes of that subtree have keys greater than `key`."  
+     if all the terminal nodes of that subtree have keys greater than `key`."
     Node? floor(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
-        if (exists cur = bstFloor(key.first, node)) {
-            switch (compare (cur.element, key.first))
+        value currentIterator = key.iterator();
+        value oneAheadIterator = key.iterator();
+        oneAheadIterator.next();
+        return getFloor(currentIterator, oneAheadIterator,
+                        keyAccumulator, node);
+    }
+    
+    Node? getFloor(KeyIterator current, 
+                   KeyIterator oneAhead,
+                   MutableList<KeyElement> keyAccumulator, 
+                   Node? node) {
+        value keyFirst = current.next();
+        "a key cannot be empty"
+        assert (is KeyElement keyFirst);
+        if (exists candidate = bstFloor(keyFirst, node)) {
+            switch (compare (candidate.element, keyFirst))
             case (smaller) {
-                keyAccumulator.add(cur.element);
-                return if (cur.terminal) then cur
-                       else lastTerminalNode(keyAccumulator, cur.middle);
+                keyAccumulator.add(candidate.element);
+                return if (candidate.terminal) then candidate
+                       else lastTerminalNode(keyAccumulator, candidate.middle);
             }        
             case (equal) {
-                if (nonempty rest = key.rest) {
-                    keyAccumulator.add(cur.element);
-                    if (exists middle = cur.middle) {
-                        value t = floor(rest, keyAccumulator, middle);
+                if (oneAhead.next() is KeyElement) {
+                    keyAccumulator.add(candidate.element);
+                    if (exists middle = candidate.middle) {
+                        value t = getFloor(current, oneAhead, 
+                                           keyAccumulator, middle);
                         if (t exists) {
                             return t;
                         }
-                        else if (cur.terminal) {
-                             return cur;
+                        else if (candidate.terminal) {
+                             return candidate;
                         }
                         else {
-                            // the element in node `cur` is too large,
+                            // the element in node `candidate` is too large,
                             // try an alternative node with a smaller element   
                             keyAccumulator.deleteLast();
-                            if (exists alt = bstStrictFloor(key.first, node)) {
-                                if (alt === cur) {
+                            if (exists alt = bstStrictFloor(keyFirst, node)) {
+                                if (alt === candidate) {
                                     return null;
                                 }
                                 else {
@@ -694,22 +722,23 @@ shared interface TernaryTreeMap<KeyElement, Item>
                         }
                     }
                     else {
-                        assert(cur.terminal);
-                        return cur;
+                        "a node with no middle child must be terminal"
+                        assert(candidate.terminal);
+                        return candidate;
                     }
                 }
                 else { // key.rest is empty
-                    if (cur.terminal) {
-                        keyAccumulator.add(cur.element);
-                        return cur;
+                    if (candidate.terminal) {
+                        keyAccumulator.add(candidate.element);
+                        return candidate;
                     }
                     else {
                         // `key` is a proper prefix of the key in this
                         // tree path, so all keys further down along any
                         // continuation of this path are greater (longer) 
                         // than `key`. Try an alternative path.
-                        if (exists alt = bstStrictFloor(key.first, node)) {
-                            if (alt === cur) {
+                        if (exists alt = bstStrictFloor(keyFirst, node)) {
+                            if (alt === candidate) {
                                 return null;
                             }
                             else {
@@ -741,29 +770,43 @@ shared interface TernaryTreeMap<KeyElement, Item>
 
     "Returns the terminal node with the smallest key greater than or equal to
      `key` within the ternary subtree rooted at the given `node`, or `null`
-     if all the terminal nodes of that subtree have keys less than `key`."  
-    Node? ceiling(Key key, 
-                  MutableList<KeyElement> keyAccumulator, Node? node) {
-        if (exists cur = bstCeiling(key.first, node)) {
-            switch (compare (cur.element, key.first))
+     if all the terminal nodes of that subtree have keys less than `key`."
+    Node? ceiling(Key key, MutableList<KeyElement> keyAccumulator, Node? node) {
+        value currentIterator = key.iterator();
+        value oneAheadIterator = key.iterator();
+        oneAheadIterator.next();
+        return getCeiling(currentIterator, oneAheadIterator,
+                          keyAccumulator, node);
+    }
+    
+    Node? getCeiling(KeyIterator current, 
+                     KeyIterator oneAhead,
+                     MutableList<KeyElement> keyAccumulator, 
+                     Node? node) {
+        value keyFirst = current.next();
+        "a key cannot be empty"
+        assert (is KeyElement keyFirst);
+        if (exists candidate = bstCeiling(keyFirst, node)) {
+            switch (compare (candidate.element, keyFirst))
             case (larger) {
-                return firstTerminalNode(keyAccumulator, cur);
+                return firstTerminalNode(keyAccumulator, candidate);
             }        
             case (equal) {
-                if (nonempty rest = key.rest) {
-                    keyAccumulator.add(cur.element);
-                    if (exists middle = cur.middle) {
-                        value t = ceiling(rest, keyAccumulator, middle);
+                if (oneAhead.next() is KeyElement) {
+                    keyAccumulator.add(candidate.element);
+                    if (exists middle = candidate.middle) {
+                        value t = getCeiling(current, oneAhead, 
+                                             keyAccumulator, middle);
                         if (t exists) {
                             return t;
                         }
                         else {
-                            // the element in node `cur` is too small,
+                            // the element in node `candidate` is too small,
                             // try an alternative node with a larger element   
                             keyAccumulator.deleteLast();
-                            if (exists alt = bstStrictCeiling(key.first, 
+                            if (exists alt = bstStrictCeiling(keyFirst, 
                                                               node)) {
-                                return if (alt === cur) then null
+                                return if (alt === candidate) then null
                                        else firstTerminalNode(keyAccumulator,
                                                               alt);
                             }
@@ -773,10 +816,10 @@ shared interface TernaryTreeMap<KeyElement, Item>
                         }
                     }
                     else {
-                        // the element in node `cur` is too small,
+                        // the element in node `candidate` is too small,
                         // try an alternative node with a larger element   
-                        if (exists alt = bstStrictCeiling(key.first, node)) {
-                            return if (alt === cur) then null
+                        if (exists alt = bstStrictCeiling(keyFirst, node)) {
+                            return if (alt === candidate) then null
                                    else firstTerminalNode(keyAccumulator, alt);
                         }
                         else {
@@ -785,16 +828,16 @@ shared interface TernaryTreeMap<KeyElement, Item>
                     }
                 }
                 else { // key.rest is empty
-                    if (cur.terminal) {
-                        keyAccumulator.add(cur.element);
-                        return cur;
+                    if (candidate.terminal) {
+                        keyAccumulator.add(candidate.element);
+                        return candidate;
                     }
                     else {
                         // `key` is a proper prefix of the key in this 
                         // tree path, so all keys further down along any 
                         // continuation of this path are greater (longer)
                         // than `key`. Return the smallest one. 
-                        return firstTerminalNode(keyAccumulator, cur);
+                        return firstTerminalNode(keyAccumulator, candidate);
                     }
                 }
             }        
@@ -810,19 +853,27 @@ shared interface TernaryTreeMap<KeyElement, Item>
     
     "Lexicographically compares two keys. Returns `smaller` if `key1 < key2`, 
      `equal` if `key1 == key2`, and `larger` if `key1 > key2`."
-    shared Comparison compareKeys(Key key1, Key key2){
-        variable Comparison result = compare(key1.first, key2.first);
-        variable Key k1 = key1;
-        variable Key k2 = key2;
-        while (result != equal, 
-               nonempty r1 = k1.rest, 
-               nonempty r2 = k2.rest) {
-            k1 = r1;
-            k2 = r2;
+    shared Comparison compareKeys(Key key1, Key key2) {
+        value it1 = key1.iterator();
+        value it2 = key2.iterator();
+        variable value cur1 = it1.next();
+        variable value cur2 = it2.next();
+        "a key cannot be empty"
+        assert (is KeyElement first1 = cur1, is KeyElement first2 = cur2);
+        variable Comparison result = compare(first1, first2);
+        while (result == equal) {
+            cur1 = it1.next();
+            cur2 = it2.next();
+            if (is KeyElement e1 = cur1, is KeyElement e2 = cur2) {
+                result = compare(e1, e2);
+            }
+            else {
+                break;
+            }
         }
         return (if (result != equal)  then result 
-                else if (k2.rest nonempty) then smaller
-                else if (k1.rest nonempty) then larger
+                else if (cur1 is KeyElement) then larger
+                else if (cur2 is KeyElement) then smaller
                 else equal);
     }
     
@@ -936,3 +987,34 @@ shared interface TernaryTreeMap<KeyElement, Item>
     }
     
 }
+
+"Links to the given `parent` node a vertical chain of middle descendents
+ containing the given `firstElement`, followed by the elements produced by 
+ the iterator `remainingElements`, and returns the first node of the vertical
+ chain (the one containing `firstElement`). The given `firstElement` gets 
+ stored in a newly created node that becomes middle child of `parent`, the 
+ first element (if any) produced by the iterator `remainingElements` gets 
+ stored in a newly created node that becomes middle grandchild of `parent`,
+ and so on. The given `item` gets stored in the last node of the vertical
+ chain, which is marked as a terminal node."
+TernaryTreeNode<KeyElement, Item> newVerticalPath<KeyElement, Item>(
+    TernaryTreeNode<KeyElement, Item>? parent, 
+    KeyElement firstElement,
+    Iterator<KeyElement> remainingElements, 
+    Item item) given KeyElement satisfies Comparable<KeyElement> {
+    value head = TernaryTreeNode<KeyElement, Item>(firstElement);
+    head.parent = parent;
+    variable TernaryTreeNode<KeyElement, Item> node = head; 
+    while (is KeyElement e = remainingElements.next()) {
+        value newNode = TernaryTreeNode<KeyElement, Item>(e);
+        newNode.parent = node;
+        node.middle = newNode;
+        node = newNode;
+    }
+    // node received the last element of the key:
+    // store item in it and mark it as terminal
+    node.item = item;
+    node.terminal = true;
+    return head;
+}
+

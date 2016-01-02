@@ -1,10 +1,10 @@
 import herd.prefixmap { 
-    TernarySearchTreeMap, TernarySplayTreeMap, wrapAsDictionary, toSequence
+    TernarySearchTreeMap, TernarySplayTreeMap
 }
 import ceylon.file { File, parsePath }
 import ceylon.collection { ArrayList, TreeMap, HashMap }
 
-void measureSearchTime(Map<String, Integer> map,
+void measureSearchTime(Map<{Character*}, Integer> map,
     ArrayList<String> keysToSearch, 
     Integer repetitions = 1) {
     variable Integer n = repetitions;
@@ -58,8 +58,7 @@ shared void run() {
             print("``t.float / (1000 * count)`` milliseconds");
         }
         try (reader = inputFile.Reader()) {
-            value map = 
-                    wrapAsDictionary(TernarySearchTreeMap<Character, Integer>());
+            value map = TernarySearchTreeMap<Character, Integer>();
             value keysToSearch = ArrayList<String>();
             while (exists word = reader.readLine()) { 
                 map.put(word, word.size);
@@ -69,8 +68,7 @@ shared void run() {
             measureSearchTime(map, keysToSearch, 10);
         }
         try (reader = inputFile.Reader()) {
-            value map = 
-                    wrapAsDictionary(TernarySplayTreeMap<Character, Integer>());
+            value map = TernarySplayTreeMap<Character, Integer>();
             value keysToSearch = ArrayList<String>();
             while (exists word = reader.readLine()) { 
                 map.put(word, word.size);
