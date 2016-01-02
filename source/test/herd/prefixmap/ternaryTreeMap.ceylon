@@ -1,11 +1,25 @@
 import herd.prefixmap { TernarySearchTreeMap,
-                        TernarySplayTreeMap,
-                        toSequence, 
-                        toString,
-                        wrapAsDictionary }
+                        TernarySplayTreeMap }
 import ceylon.test { test, assertTrue, assertFalse, 
                      assertEquals, assertNotEquals }
 import ceylon.file { ... }
+
+"Converts a non-empty `String` in `Character` sequence."
+shared [Character+] toSequence(String nonEmptyString) {
+    value seq = nonEmptyString.sequence();
+    "parameter `nonEmptyString` is supposed to be a non-empty String"
+    assert (nonempty seq);
+    return seq; 
+}
+
+"Converts a `Character` stream in `String`."
+shared String toString({Character*} charStream) {
+    value strBuilder = StringBuilder();
+    for (c in charStream) {
+        strBuilder.appendCharacter(c);
+    }
+    return strBuilder.string;
+}
 
 shared test void testEmptyTernaryTreeMap() {
     value map = TernarySearchTreeMap<Character, Integer>();
@@ -14,17 +28,17 @@ shared test void testEmptyTernaryTreeMap() {
 
 shared test void testSingleEntryTernaryTreeMap() {
     value map = TernarySearchTreeMap<Character, Integer>();
-    value key = toSequence("0123456789");
+    value key = "0123456789";
     map.put(key, key.size);
     assertFalse(map.empty);
     assertEquals(map.size, 1);
     assertTrue(map.defines(key));
     assertEquals(map.get(key), key.size);
     for (entry in map) {
-        assertEquals(entry, key->key.size);
+        assertEquals(entry, toSequence(key)->key.size);
     }
     for (k in map.keys) {
-        assertEquals(k, key);
+        assertEquals(toString(k), key);
     }
     for (i in map.items) {
         assertEquals(i, key.size);
@@ -32,16 +46,16 @@ shared test void testSingleEntryTernaryTreeMap() {
     variable Character[] keyPrefix = [];
     for (c in '0'..'9') {
         keyPrefix = keyPrefix.append<Character>([c]);
-        //print(keyPrefix);
+        print(keyPrefix);
         assertTrue(map.hasKeyWithPrefix(keyPrefix));
         for (k in map.keysWithPrefix(keyPrefix)) {
-            assertEquals(k, key);
+            assertEquals(toString(k), key);
         }
         for (entry in map.entriesWithPrefix(keyPrefix)) {
-            assertEquals(entry, key->key.size);
+            assertEquals(entry, toSequence(key)->key.size);
         }
     }
-    assertFalse(map.hasKeyWithPrefix(toSequence("12345")));
+    assertFalse(map.hasKeyWithPrefix("12345"));
     
     value clonedMap = map.clone();
     assertEquals(map, clonedMap);
@@ -62,7 +76,7 @@ shared test void testMultipleEntryTernaryTreeMap() {
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
     for (str in strings) {
-        n = map.put(toSequence(str), str.size);
+        n = map.put(str, str.size);
         print(n);
         print(map);
         map.printNodes();
@@ -71,22 +85,22 @@ shared test void testMultipleEntryTernaryTreeMap() {
     assertEquals(map, originalMap);
     assertEquals(map.hash, originalMap.hash);
     
-    n = map.remove(toSequence("cast"));
+    n = map.remove("cast");
     print(n);
     print(map);
     
-    //n = map.remove(toSequence("caste"));
-    n = map.remove(toSequence("cats"));
-    print(n);
-    print(map);
-    map.printNodes();
-    
-    n = map.remove(toSequence("donut"));
+    //n = map.remove("caste");
+    n = map.remove("cats");
     print(n);
     print(map);
     map.printNodes();
     
-    n = map.remove(toSequence("day"));
+    n = map.remove("donut");
+    print(n);
+    print(map);
+    map.printNodes();
+    
+    n = map.remove("day");
     print(n);
     print(map);
     map.printNodes();
@@ -97,21 +111,21 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print(originalMap.size);
     
     value m = TernarySearchTreeMap {
-        entries = { for (str in strings) toSequence(str) -> str.size };
+        entries = { for (str in strings) str -> str.size };
         Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
     };
     print(m);
-    n = m.get(toSequence("dOnUt"));
+    n = m.get("dOnUt");
     print(n);
     
     print(m.first);
     print(m.last);
     
-    value x15 = TernarySearchTreeMap({ toSequence("X")-> 15 });
+    value x15 = TernarySearchTreeMap({ "X"-> 15 });
     print(x15.first);
     print(x15.last);
     
-    value aaa = TernarySearchTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2, toSequence("abc")-> 3});
+    value aaa = TernarySearchTreeMap({ "a"-> 1, "ab"-> 2, "abc"-> 3});
     print(aaa.first);
     print(aaa.last);
 
@@ -129,16 +143,16 @@ shared test void testMultipleEntryTernaryTreeMap() {
     }
     
     print("=========================================================================");
-    print(m.higherEntries(toSequence("bat")));
+    print(m.higherEntries("bat"));
     
     print("=========================================================================");
-    print(m.higherEntries(toSequence("bates")));
+    print(m.higherEntries("bates"));
     
     print("=========================================================================");
-    print(m.higherEntries(toSequence("dont")));
+    print(m.higherEntries("dont"));
     
     print("=========================================================================");
-    print(m.lowerEntries(toSequence("dont")));
+    print(m.lowerEntries("dont"));
 
     print("*************************************************************************");    
     print(m);
@@ -147,29 +161,29 @@ shared test void testMultipleEntryTernaryTreeMap() {
     print("\n");
     print("\n");
     print("*************************************************************************");    
-    print(m.higherEntries(toSequence("as")));
+    print(m.higherEntries("as"));
     print("\n");
     print("\n");
     print("\n");
     print("\n");
     print("*************************************************************************");    
-    print(m.lowerEntries(toSequence("z")));
+    print(m.lowerEntries("z"));
     print("\n");
     print("\n");
     print("\n");
     print("\n");
     print(aaa);
-    print(aaa.lowerEntries(toSequence("z")));    
+    print(aaa.lowerEntries("z"));    
     print("\n");
     print("\n");
     print("\n");
     print("\n");
     
-    value ab = TernarySearchTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2});
+    value ab = TernarySearchTreeMap({ "a"-> 1, "ab"-> 2});
     print(ab);
     print("\n");
     print("\n");
-    print(ab.lowerEntries(toSequence("z")));    
+    print(ab.lowerEntries("z"));    
 }
 
 shared test void testTernaryTreeMapWithFullDictionary() {
@@ -198,7 +212,7 @@ shared test void testTernaryTreeMapWithFullDictionary() {
                                           writer2 = outputFile2.Overwriter()) {
             value map = TernarySearchTreeMap<Character, Integer>();
             while (exists word = reader.readLine()) { 
-                map.put(toSequence(word), word.size);
+                map.put(word, word.size);
             }
             for (entry in map) {
                 writer.writeLine(toString(entry.key));  
@@ -218,17 +232,17 @@ shared test void testTernaryTreeMapWithFullDictionary() {
 
 shared test void testSingleEntryTernarySplayTreeMap() {
     value map = TernarySplayTreeMap<Character, Integer>();
-    value key = toSequence("0123456789");
+    value key = "0123456789";
     map.put(key, key.size);
     assertFalse(map.empty);
     assertEquals(map.size, 1);
     assertTrue(map.defines(key));
     assertEquals(map.get(key), key.size);
     for (entry in map) {
-        assertEquals(entry, key->key.size);
+        assertEquals(entry, toSequence(key)->key.size);
     }
     for (k in map.keys) {
-        assertEquals(k, key);
+        assertEquals(toString(k), key);
     }
     for (i in map.items) {
         assertEquals(i, key.size);
@@ -236,16 +250,16 @@ shared test void testSingleEntryTernarySplayTreeMap() {
     variable Character[] keyPrefix = [];
     for (c in '0'..'9') {
         keyPrefix = keyPrefix.append<Character>([c]);
-        //print(keyPrefix);
+        print(keyPrefix);
         assertTrue(map.hasKeyWithPrefix(keyPrefix));
         for (k in map.keysWithPrefix(keyPrefix)) {
-            assertEquals(k, key);
+            assertEquals(toString(k), key);
         }
         for (entry in map.entriesWithPrefix(keyPrefix)) {
-            assertEquals(entry, key->key.size);
+            assertEquals(entry, toSequence(key)->key.size);
         }
     }
-    assertFalse(map.hasKeyWithPrefix(toSequence("12345")));
+    assertFalse(map.hasKeyWithPrefix("12345"));
     
     value clonedMap = map.clone();
     assertEquals(map, clonedMap);
@@ -266,7 +280,7 @@ shared test void testTernarySplayTreeMap() {
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
     for (str in strings) {
-        n = map.put(toSequence(str), str.size);
+        n = map.put(str, str.size);
         print(n);
         print(map);
         map.printNodes();
@@ -274,7 +288,7 @@ shared test void testTernarySplayTreeMap() {
     map.clear();
     value moreStrings = {"regret", "ultra's", "insinuating", "Charlotte's", "stakeouts"};
     for (str in moreStrings) {
-        n = map.put(toSequence(str), str.size);
+        n = map.put(str, str.size);
         //print(n);
         //print(map);
         //map.printNodes();
@@ -285,7 +299,7 @@ shared test void testTernarySplayTreeMap() {
     map.clear();
     value yetMoreStrings = {"escapade", "es"};
     for (str in yetMoreStrings) {
-        n = map.put(toSequence(str), str.size);
+        n = map.put(str, str.size);
         print(map);
         map.printNodes();
     }
@@ -297,7 +311,7 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
     for (str in strings) {
-        n = map.put(toSequence(str), str.size);
+        n = map.put(str, str.size);
         print(n);
         print(map);
         map.printNodes();
@@ -306,30 +320,30 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     assertEquals(map, originalMap);
     assertEquals(map.hash, originalMap.hash);
     
-    n = map.remove(toSequence("cast"));
+    n = map.remove("cast");
     print(n);
     print(map);
     
-    //n = map.remove(toSequence("caste"));
-    n = map.remove(toSequence("cats"));
+    //n = map.remove("caste");
+    n = map.remove("cats");
     print(n);
     print(map);
     map.printNodes();
     
     print("will remove \"donut\" -------------------------------------------");
-    n = map.remove(toSequence("donut"));
+    n = map.remove("donut");
     print(n);
     print(map);
     map.printNodes();
     
     print("will remove \"day\" ---------------------------------------------");
-    n = map.remove(toSequence("day"));
+    n = map.remove("day");
     print(n);
     print(map);
     map.printNodes();
     
     print("will remove \"caste\" -------------------------------------------");
-    n = map.remove(toSequence("caste"));
+    n = map.remove("caste");
     print(n);
     print(map);
     map.printNodes();
@@ -340,21 +354,21 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     print(originalMap.size);
     
     value m = TernarySplayTreeMap {
-        entries = { for (str in strings) toSequence(str) -> str.size };
+        entries = { for (str in strings) str -> str.size };
         Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
     };
     print(m);
-    n = m.get(toSequence("dOnUt"));
+    n = m.get("dOnUt");
     print(n);
     
     print(m.first);
     print(m.last);
     
-    value x15 = TernarySplayTreeMap({ toSequence("X")-> 15 });
+    value x15 = TernarySplayTreeMap({ "X"-> 15 });
     print(x15.first);
     print(x15.last);
     
-    value aaa = TernarySplayTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2, toSequence("abc")-> 3});
+    value aaa = TernarySplayTreeMap({ "a"-> 1, "ab"-> 2, "abc"-> 3});
     print(aaa.first);
     print(aaa.last);
     
@@ -372,16 +386,16 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     }
     
     print("=========================================================================");
-    print(m.higherEntries(toSequence("bat")));
+    print(m.higherEntries("bat"));
     
     print("=========================================================================");
-    print(m.higherEntries(toSequence("bates")));
+    print(m.higherEntries("bates"));
     
     print("=========================================================================");
-    print(m.higherEntries(toSequence("dont")));
+    print(m.higherEntries("dont"));
     
     print("=========================================================================");
-    print(m.lowerEntries(toSequence("dont")));
+    print(m.lowerEntries("dont"));
     
     print("*************************************************************************");    
     print(m);
@@ -390,29 +404,29 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     print("\n");
     print("\n");
     print("*************************************************************************");    
-    print(m.higherEntries(toSequence("as")));
+    print(m.higherEntries("as"));
     print("\n");
     print("\n");
     print("\n");
     print("\n");
     print("*************************************************************************");    
-    print(m.lowerEntries(toSequence("z")));
+    print(m.lowerEntries("z"));
     print("\n");
     print("\n");
     print("\n");
     print("\n");
     print(aaa);
-    print(aaa.lowerEntries(toSequence("z")));    
+    print(aaa.lowerEntries("z"));    
     print("\n");
     print("\n");
     print("\n");
     print("\n");
     
-    value ab = TernarySplayTreeMap({ toSequence("a")-> 1, toSequence("ab")-> 2});
+    value ab = TernarySplayTreeMap({ "a"-> 1, "ab"-> 2});
     print(ab);
     print("\n");
     print("\n");
-    print(ab.lowerEntries(toSequence("z")));    
+    print(ab.lowerEntries("z"));    
 }
 
 shared test void testTernarySplayTreeMapWithFullDictionary() {
@@ -442,7 +456,7 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
             writer2 = outputFile2.Overwriter()) {
             value map = TernarySplayTreeMap<Character, Integer>();
             while (exists word = reader.readLine()) {
-                map.put(toSequence(word), word.size);
+                map.put(word, word.size);
             }
             print("``map.size`` entries");
             for (entry in map) {
@@ -460,48 +474,48 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
     }
 }
 
-shared test void testMultipleEntryTernaryTreeDictionary() {
+shared test void testMultipleEntryTernaryTree() {
+    //value map = TernarySearchTreeMap<Character, Integer>();
     value map = TernarySplayTreeMap<Character, Integer>();
-    value dict = wrapAsDictionary(map);
     variable Integer? n;
     
     value strings = {"bog", "at", "as", "bat", "bats", "boy", "day", "cats", "caste", "donut", "dog", "door"};
     for (str in strings) {
-        n = dict.put(str, str.size);
+        n = map.put(str, str.size);
         print(n);
-        print(dict);
+        print(map);
     }
-    value originalDict = dict.clone();
-    assertEquals(dict, originalDict);
-    assertEquals(dict.hash, originalDict.hash);
+    value originalMap = map.clone();
+    assertEquals(map, originalMap);
+    assertEquals(map.hash, originalMap.hash);
     
-    n = dict.remove("cast");
+    n = map.remove("cast");
     print(n);
-    print(dict);
+    print(map);
     
-    //n = dict.remove(toSequence("caste"));
-    n = dict.remove("cats");
+    //n = map.remove("caste");
+    n = map.remove("cats");
     print(n);
-    print(dict);
+    print(map);
     
     print("will remove \"donut\" -------------------------------------------");
-    n = dict.remove("donut");
+    n = map.remove("donut");
     print(n);
-    print(dict);
+    print(map);
     
     print("will remove \"day\" ---------------------------------------------");
-    n = dict.remove("day");
+    n = map.remove("day");
     print(n);
-    print(dict);
+    print(map);
     
     print("will remove \"caste\" -------------------------------------------");
-    n = dict.remove("caste");
+    n = map.remove("caste");
     print(n);
-    print(dict);
+    print(map);
     
-    print(if (dict != originalDict) then "dict changed" else "");
-    print(originalDict);
-    print(originalDict.size);
+    print(if (map != originalMap) then "map changed" else "");
+    print(originalMap);
+    print(originalMap.size);
     
 }
 

@@ -1,7 +1,7 @@
 class MutableBox<Item>(shared variable Item? content) {}
 
 "A mutable [[PrefixMap]] implemented by a _ternary search tree_ 
- whose keys are sequences of [[Comparable]] elements. Map entries 
+ whose keys are streams of [[Comparable]] elements. Map entries 
  are mantained in lexicographic order of keys, from the smallest
  to the largest key. The lexicographic ordering of keys relies on 
  comparisons of [[KeyElement]]s, performed either by the method 
@@ -68,23 +68,21 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     // initialization of root
     root = if (exists nodeToClone) 
            then nodeToClone.deepCopy() else null;
-    
+/*    
     "Links to the given `parent` node a vertical chain of middle descendents
-     containing the elements of the given `key`. The first element of `key`
+     containing the elements produced by the given `keyIterator`, which is
+     assumed to be not exhausted. The first element produced by `keyIterator`
      gets stored in a newly created node that becomes middle child of
-     `parent`, the second element (if it exists) gets stored in a newly
-     created node that becomes middle grandchild of `parent`, and so on.
-     The given `item` gets stored in the last node of the vertical chain,
-     which is marked as a terminal node."
-    Node newVerticalPath(Node? parent, Key key, Item item) {
-        variable KeyElement e = key.first;
-        variable KeyElement[] rest = key.rest;
-        value head = Node(e);
+     `parent`, the second element (if it exists) gets stored in a newly 
+     created node that becomes middle grandchild of `parent`, and so on. The 
+     given `item` gets stored in the last node of the vertical chain, which
+     is marked as a terminal node."
+    Node newVerticalPath(Node? parent, KeyIterator keyIterator, Item item) {
+        assert (is KeyElement first = keyIterator.next());
+        value head = Node(first);
         head.parent = parent;
         variable Node node = head; 
-        while (nonempty toCopy = rest) {
-            e = toCopy.first;
-            rest = toCopy.rest;
+        while (is KeyElement e = keyIterator.next()) {
             value newNode = Node(e);
             newNode.parent = node;
             node.middle = newNode;
@@ -96,22 +94,23 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         node.terminal = true;
         return head;
     }
-    
+*/    
     shared actual Item? put(Key key, Item item) {
         variable Node? node = root;
         variable Node? previousNode = null;
-        variable KeyElement[] keySuffix = key; 
+        value keyIterator = key.iterator();
         variable Comparison branch = equal; // whatever
-        while (exists n = node, nonempty suffix = keySuffix) {
+        variable value current = keyIterator.next();
+        while (exists n = node, is KeyElement keyElement = current) {
             previousNode = n;
-            branch = compare(suffix.first, n.element);
+            branch = compare(keyElement, n.element);
             switch (branch)
             case (smaller) { 
                 node = n.left;
             }
             case (equal) {
                 node = n.middle;
-                keySuffix = suffix.rest;
+                current = keyIterator.next();
             }
             case (larger) {
                 node = n.right;
@@ -120,17 +119,18 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         if (exists n = previousNode) {
             switch (branch)
             case (smaller) {
-                assert(nonempty suffix = keySuffix); 
-                n.left = newVerticalPath(n, suffix, item);
+                assert (is KeyElement keyElement = current);
+                n.left = newVerticalPath(n, keyElement, keyIterator, item);
                 return null;  
             }
             case (equal) {
-                if (nonempty suffix = keySuffix) {
+                if (is KeyElement keyElement = current) {
                     "reached the end of a vertical path"
                     assert(!n.middle exists);
                     "any node with no middle child must be terminal"
                     assert(n.terminal);
-                    n.middle = newVerticalPath(n, suffix, item);
+                    n.middle = newVerticalPath(n, keyElement, 
+                                                keyIterator, item);
                     return null;
                 }
                 else if (!n.terminal) {
@@ -145,13 +145,16 @@ shared class TernarySearchTreeMap<KeyElement, Item>
                 }
             }
             case (larger) {
-                assert(nonempty suffix = keySuffix); 
-                n.right = newVerticalPath(n, suffix, item);
+                assert (is KeyElement keyElement = current);
+                n.right = newVerticalPath(n, keyElement, keyIterator, item);
                 return null;  
             }
         }
         else {
-            root = newVerticalPath(null, key, item);
+            // The while loop was never entered, 
+            // so `current` must still be the first key element
+            assert (is KeyElement keyFirst = current);
+            root = newVerticalPath(null, keyFirst, keyIterator, item);
             return null;
         }
     }
@@ -163,40 +166,15 @@ shared class TernarySearchTreeMap<KeyElement, Item>
     
     // End of initializer section
     
-    Node? recursiveSearch(Key key, Node? node) {
-        if (!exists node) {
-            return null; 
-        }
-        else { 
-            switch (compare(key.first, node.element))
-            case (smaller) { 
-                return recursiveSearch(key, node.left); 
-            } 
-            case (larger) {
-                return recursiveSearch(key, node.right); 
-            }
-            case (equal) {
-                if (nonempty rest = key.rest) {
-                    return recursiveSearch(rest, node.middle); 
-                }
-                else {
-                    // the last element of `key` matched the one in `node`
-                    return node;
-                }
-            }
-        }
-    }
-    
     shared actual Object? search(Key key)
-            => recursiveSearch(key, root);
-    
-   /*
-    //Iterative version of lookup
-    Node? lookup(Key key, Node? startingNode = root) {
-        variable Node? node = startingNode;
-        variable Key k = key;
+    {
+        variable Node? node = root;
+        Iterator<KeyElement> it = key.iterator();
+        "a key must be non-empty"
+        assert (is KeyElement firstElement = it.next());
+        variable KeyElement element = firstElement;
         while (exists n = node) {
-            switch (compare(k.first, n.element))
+            switch (compare(element, n.element))
             case (smaller) {
                 node = n.left;
             }
@@ -204,34 +182,37 @@ shared class TernarySearchTreeMap<KeyElement, Item>
                 node = n.right;
             }
             case (equal) {
-                if (nonempty rest = k.rest) {
+                value next = it.next();
+                if (is KeyElement next) {
                     node = n.middle;
-                    k = rest;
-                }
+                    element = next;
+                } 
                 else {
                     // we have just looked at the last element of `key`,
                     // and it matched the element in `node`
-                    return if (n.terminal) then n else null;
+                    return n;
                 }
             }
         }
         return null;
     }
-    */
-   
+    
     Boolean leaf(Node n)
             => !(n.left exists) && !(n.middle exists) && !(n.right exists);
     
-    Node? removeNodes(Node? node, MutableBox<Item> itemRemoved, Key key) {
+    Node? removeNodes(Node? node, 
+                      MutableBox<Item> itemRemoved, 
+                      KeyElement keyFirst, 
+                      KeyIterator keyRest) {
         if (!exists node) {
             return null;
         }
         else {
             value e = node.element;
-            value first = key.first;
-            switch (compare(first, e))
+            switch (compare(keyFirst, e))
             case (smaller) {
-                node.left = removeNodes(node.left, itemRemoved, key);
+                node.left = removeNodes(node.left, itemRemoved, 
+                                        keyFirst, keyRest);
                 if (exists left = node.left) {
                     left.parent = node;
                     return node;
@@ -245,7 +226,8 @@ shared class TernarySearchTreeMap<KeyElement, Item>
                 }
             }
             case (larger) {
-                node.right = removeNodes(node.right, itemRemoved, key);
+                node.right = removeNodes(node.right, itemRemoved, 
+                                         keyFirst, keyRest);
                 if (exists right = node.right) {
                     right.parent = node;
                     return node;
@@ -259,8 +241,9 @@ shared class TernarySearchTreeMap<KeyElement, Item>
                 }
             }
             case (equal) {
-                if (nonempty rest = key.rest) {
-                    node.middle = removeNodes(node.middle, itemRemoved, rest);
+                if (is KeyElement keyNext = keyRest.next()) {
+                    node.middle = removeNodes(node.middle, itemRemoved,
+                                              keyNext, keyRest);
                     if (exists middle = node.middle) {
                         middle.parent = node;
                     }
@@ -343,7 +326,9 @@ shared class TernarySearchTreeMap<KeyElement, Item>
         value itemRemoved = MutableBox<Item> {
             content = null;
         };
-        root = removeNodes(root, itemRemoved, key);
+        value keyIterator = key.iterator();
+        assert (is KeyElement keyFirst = keyIterator.next());
+        root = removeNodes(root, itemRemoved, keyFirst, keyIterator);
         if (exists r = root) {
             r.parent = null;
         }

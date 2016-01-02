@@ -1,5 +1,5 @@
 "A mutable [[PrefixMap]] implemented by a _ternary splay tree_ 
- whose keys are sequences of [[Comparable]] elements. Map entries 
+ whose keys are streams of [[Comparable]] elements. Map entries 
  are mantained in lexicographic order of keys, from the smallest
  to the largest key. The lexicographic ordering of keys relies on 
  comparisons of [[KeyElement]]s, performed either by the method 
@@ -40,6 +40,11 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     shared actual Comparison(KeyElement, KeyElement) compare;
 
     variable Node? splayHeader = null;
+    
+    value exhaustedIterator = 
+            object satisfies Iterator<Nothing> {
+                next() => finished;
+            };
 
     "Create a new `TernarySplayTreeMap` with the given `entries` and
      the comparator function specified by the parameter `compare`." 
@@ -71,7 +76,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
     
     "A mutable box to be filled out with the results of a call to `splay`."
     class SplayOutputBox() {
-        shared variable KeyElement[] remainingKeyElements = [];
+        shared variable KeyElement? firstUnmatchedElement = null;
+        shared variable Iterator<KeyElement> remainingUnmatchedElements = 
+                exhaustedIterator;
         shared variable Node? lastMatchingNode = null;
     }
 
@@ -81,28 +88,39 @@ shared class TernarySplayTreeMap<KeyElement, Item>
      nodes in a way that tends to improve tree balancing and, at the same
      time, places that longest prefix in a vertical middle chain whose first
      node is the root of the tree. As a result of splaying, the node with first
-     element of the longest `key`prefix becomes `root`, the node with the
+     element of the longest `key` prefix becomes `root`, the node with the
      second element (if it exists) becomes middle child of `root`, the node 
      with the third element (if it exists) becomes middle grandchild of `root`,
-     and so on. "
-    void splay(
+     and so on.
+     
+     If the given `key` is found in the this tree (in other words, if the 
+     longest `key` prefix in the tree is `key` itself) , `splay` returns the
+     last node of a vertical middle chain that starts at the root and 
+     contains the elements of `key`. (This is the terminal node that contains
+     the last element of `key` and the item associated with `key`.)
+     Otherwise, `splay` returns null."
+    Node? splay(
         "The key whose longest prefix will be moved to a vertical middle chain
          starting at the root."
-        Key key, 
+        Key key,
         "If `outBox` exists, it is updated as follows: 
-         - The field `remainingKeyElements` gets a (possibly empty) sequence 
-           with the unmatched key tail, that is, with the tailing elements of 
-           `key` that are not part of the longest `key` prefix within this
-           tree.
+         - The fields `firstUnmatchedElement` and `remainingUnmatchedElements`
+           get the (possibly empty) unmatched key tail, that is, the sequence
+           of the tailing elements of `key` that are not part of the longest
+           `key` prefix within this tree. If this sequence is empty,
+           `firstUnmatchedElement` gets `null`. Otherwise,
+           `firstUnmatchedElement` gets the first element of the unmatched
+           key tail, and `remainingUnmatchedElements` gets an iterator that
+           produces the remaining elements of the unmatched key tail. 
          - The field `lastMatchingNode` gets the (possibly `null`) last node
            of the vertical middle chain with the longest `key` prefix."
         SplayOutputBox? outBox = null) {
-        // Ternary splaying is implemented as a sequence of plain 
-        // _binary splaying_ operations, one per element of the `key` prefix
+        // Ternary splaying is implemented as a series of plain _binary 
+        // splaying_ operations, one per element of the `key` prefix
         // found in the tree. Each binary splaying operation is performed on 
         // the _binary_ subtree that may contain the next element. If this 
         // element is found, binary splaying moves it to the root of its 
-        // binary subtree. The sequence of binary splaying operations ends
+        // binary subtree. The series of binary splaying operations ends
         // when some key element is not found, of when the last `key` 
         // element is moved to the root of its binary subtree.
         //
@@ -111,25 +129,24 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         // http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf
         variable Node l;
         variable Node r; 
-        variable Node? lastMatchingNode = null;
-        variable Key k = key;
-        variable KeyElement[] keyRest = key;
         variable Boolean keyElementFound;
-        if (exists box = outBox) {
-            box.remainingKeyElements = key;
-            box.lastMatchingNode = null;
-        }
+        Iterator<KeyElement> it = key.iterator();
+        "a key must be non-empty"
+        assert (is KeyElement firstElement = it.next());
+        variable KeyElement element = firstElement;
+        variable KeyElement? firstUnmatchedElement = firstElement; 
+        variable Node? lastMatchingNode = null;
         if (splayHeader is Null) {
             // Late initialization of the auxiliary node `splayHeader`. 
             // The key element stored in this node is completely irrelevant.
             // Even so, the node must have _some_ key element within itself.
-            // So we postponed the creation of `splayHeader` until we had 
-            // some instance of `KeyElement` at hand. 
-            splayHeader = Node(key.first);
+            // We postponed the creation of `splayHeader` until we had some
+            // instance of `KeyElement` at hand. 
+            splayHeader = Node(element);
         }
         assert (exists header = splayHeader);
-        assert (exists rootNode = root);
-        variable Node curNode = rootNode;
+        assert (exists theRootNode = root);
+        variable Node curNode = theRootNode;
         // The outer loop below iterates over `key` elements. Its body does 
         // a top-down splay on the _binary_ subtree that may contain the next
         // key element (`k.first`). The body of the outer loop is based on 
@@ -142,11 +159,11 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             header.right = null;
             keyElementFound = false;
             while (true) {
-                switch (compare(k.first, curNode.element))
+                switch (compare(element, curNode.element))
                 case (smaller) {
                     if (exists curLeft = curNode.left) {
                         variable Node nextNode = curLeft;
-                        if (compare(k.first, curLeft.element) == smaller) {
+                        if (compare(element, curLeft.element) == smaller) {
                             // rotate right
                             curNode.left = curLeft.right;
                             if (exists n = curLeft.right) {
@@ -181,7 +198,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                 case (larger) {
                     if (exists curRight = curNode.right) {
                         variable Node nextNode = curRight;
-                        if (compare(k.first, curRight.element) == larger) {      
+                        if (compare(element, curRight.element) == larger) {      
                             // rotate left
                             curNode.right = curRight.left;
                             if (exists n = curRight.left) {
@@ -237,60 +254,53 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             }
             // bottom of outer loop
             if (keyElementFound) {
-                keyRest = k.rest;
                 lastMatchingNode = curNode;
-                if (nonempty rest = keyRest, exists m = curNode.middle) {
-                    k = rest;
-                    curNode = m;
+                value next = it.next();
+                if (is KeyElement next) {
+                    if (exists m = curNode.middle) {
+                        element = next;
+                        curNode = m;
+                    }
+                    else {
+                        firstUnmatchedElement = next;
+                        break;
+                    }
                 }
                 else {
+                    firstUnmatchedElement = null;
                     break;
                 }
             }
             else {
+                firstUnmatchedElement = element;
                 break;
             }
         }
         if (exists box = outBox) {
-            box.remainingKeyElements = keyRest;
+            box.firstUnmatchedElement = firstUnmatchedElement;
+            box.remainingUnmatchedElements = it;
             box.lastMatchingNode = lastMatchingNode;
         }
-    }
-
-    "Links to the given `parent` node a vertical chain of middle descendents
-     containing the elements of the given `key`. The first element of `key`
-     gets stored in a newly created node that becomes middle child of
-     `parent`, the second element (if it exists) gets stored in a newly
-     created node that becomes middle grandchild of `parent`, and so on.
-     The given `item` gets stored in the last node of the vertical chain,
-     which is marked as a terminal node."
-    Node newVerticalPath(Node? parent, Key key, Item item) {
-        variable KeyElement e = key.first;
-        variable KeyElement[] rest = key.rest;
-        value head = Node(e);
-        head.parent = parent;
-        variable Node node = head; 
-        while (nonempty toCopy = rest) {
-            e = toCopy.first;
-            rest = toCopy.rest;
-            value newNode = Node(e);
-            newNode.parent = node;
-            node.middle = newNode;
-            node = newNode;
+        if (!firstUnmatchedElement exists) { 
+            //assert (lastMatchingNode exists);
+            return lastMatchingNode;  
         }
-        // node received the last element of the key:
-        // store item in it and mark it as terminal
-        node.item = item;
-        node.terminal = true;
-        return head;
-    }
+        else {
+            return null;
+        }
 
+    }
+    
     shared actual Item? put(Key key, Item item) {
         if (root exists) {
-            value box = SplayOutputBox(); 
+            value box = SplayOutputBox();
             splay(key, box);
-            if (nonempty keySuffix = box.remainingKeyElements) {
-                Node newSubtree = newVerticalPath(null, keySuffix, item);
+            value firstRemainingElement = box.firstUnmatchedElement;
+            if (is KeyElement firstRemainingElement) {
+                Node newSubtree = newVerticalPath(null, 
+                                                   firstRemainingElement, 
+                                                   box.remainingUnmatchedElements,
+                                                   item);
                 Node curNode;
                 if (exists node = box.lastMatchingNode) {
                     if (exists m = node.middle) {
@@ -306,7 +316,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
                     assert (exists r = root);
                     curNode = r;
                 }
-                switch (compare(keySuffix.first, curNode.element))
+                switch (compare(firstRemainingElement, curNode.element))
                 case (smaller) {
                     newSubtree.left = curNode.left;
                     if (exists n = curNode.left) {
@@ -354,7 +364,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             }
         }
         else {
-            root = newVerticalPath(null, key, item);
+            value keyIterator = key.iterator();
+            assert (is KeyElement keyFirst = keyIterator.next());
+            root = newVerticalPath(null, keyFirst,  keyIterator, item);
             return null;
         }
     }
@@ -368,23 +380,9 @@ shared class TernarySplayTreeMap<KeyElement, Item>
 
     // End of initializer section
 
-    shared actual Object? search(Key key) {
-        if (root exists) {
-            value box = SplayOutputBox(); 
-            splay(key, box);
-            if (box.remainingKeyElements.empty) { 
-                //assert (box.lastMatchingNode exists);
-                return box.lastMatchingNode;  
-            }
-            else {
-                return null;
-            }
-        }
-        else {
-            return null;
-        }
-    }
-
+    shared actual Object? search(Key key)
+            => if (root exists) then splay(key) else null;
+    
     "Removes the given `node` and puts one of its child nodes
      (the given `childNode`) in its place."
     void childNodeReplacesItsParent(Node? childNode, Node node) {
@@ -417,7 +415,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
         if (root exists) {
             value box = SplayOutputBox(); 
             splay(key, box);
-            if (box.remainingKeyElements.empty, 
+            if (!box.firstUnmatchedElement exists, 
                     exists node = box.lastMatchingNode,
                     node.terminal) {
                 variable Node curNode = node;
@@ -477,7 +475,7 @@ shared class TernarySplayTreeMap<KeyElement, Item>
             }
             else {
                 // there are unmatched key elements 
-                // (`remainingKeyElements` is non empty)
+                // (`remainingKeyElements` is not exhausted)
                 return null;
             }
         }
