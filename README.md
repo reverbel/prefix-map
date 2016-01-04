@@ -1,25 +1,25 @@
 # prefix-map
 
-__[Ceylon module](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/index.html) that provides general-purpose maps with support to prefix queries__
+__[Ceylon module](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/index.html) that provides general-purpose maps with support to prefix queries__
    
 The module defines the following interfaces:
    
-- [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/PrefixMap.type.html), 
+- [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/PrefixMap.type.html), 
   an immutable [`SortedMap`](https://modules.ceylon-lang.org/repo/1/ceylon/collection/1.2.0/module-doc/api/SortedMap.type.html)
   that supports prefix queries and whose keys are streams of `Comparable`
   objects;
-- [`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/TernaryTreeMap.type.html), 
-  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/PrefixMap.type.html) 
+- [`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/TernaryTreeMap.type.html), 
+  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/PrefixMap.type.html) 
   backed by a ternary search tree.
      
-[`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/TernaryTreeMap.type.html)
+[`TernaryTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/TernaryTreeMap.type.html)
 is an abstract supertype for the following concrete implementations:
    
-- [`TernarySearchTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/TernarySearchTreeMap.type.html), 
-  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/PrefixMap.type.html)
+- [`TernarySearchTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/TernarySearchTreeMap.type.html), 
+  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/PrefixMap.type.html)
   based on a ternary search tree;  
-- [`TernarySplayTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/TernarySplayTreeMap.type.html), 
-  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.6/module-doc/api/PrefixMap.type.html)
+- [`TernarySplayTreeMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/TernarySplayTreeMap.type.html), 
+  a mutable [`PrefixMap`](https://modules.ceylon-lang.org/repo/1/herd/prefixmap/0.0.7/module-doc/api/PrefixMap.type.html)
   based on a ternary splay tree.
      
 A _ternary search tree_, also known as a _lexicographic search tree_,
