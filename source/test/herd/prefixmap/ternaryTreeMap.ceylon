@@ -188,7 +188,7 @@ shared test void testMultipleEntryTernaryTreeMap() {
 }
 
 shared test void testTernaryTreeMapWithFullDictionary() {
-    value inputFilePath = parsePath("/home/reverbel/american-english.shuffled");
+    value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.shuffled");
     if (is File inputFile = inputFilePath.resource) {
         value outputFilePath = home.childPath("american-english.iterated");
         value toDelete = outputFilePath.resource;
@@ -433,7 +433,8 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
 
 shared test void testTernarySplayTreeMapWithFullDictionary() {
     //value inputFilePath = parsePath("/usr/share/dict/american-english");
-    value inputFilePath = parsePath("/home/reverbel/american-english.shuffled");
+    value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.shuffled");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/find.output.shuffled");
     if (is File inputFile = inputFilePath.resource) {
         value outputFilePath = home.childPath("american-english.splay-tree-iterated");
         value toDelete = outputFilePath.resource;
@@ -521,3 +522,25 @@ shared test void testMultipleEntryTernaryTree() {
     
 }
 
+shared test void testReverseIterator() {
+    //value map = TernarySearchTreeMap<Character, String, Integer>(toString);
+    value map = TernarySplayTreeMap<Character, String, Integer>(toString);
+    
+    value strings = ["as", "at", "bat", "bats", "bog", "boy", "caste", "cats", "day", "dog", "donut", "door"];
+    for (str in strings) {
+        map.put(str, str.size);
+    }
+    //print(map);
+    value entries = map.sequence();
+    for (str in strings) {
+        //print(">>> ``str``");
+        value s1 = map.lowerEntries(str).sequence();
+        value s2 = map.higherEntries(str).sequence().rest;
+        value s3 = s1.reversed.append(s2);
+        //print(s1);
+        //print(s2);
+        //print(s3);
+        //print("-------------------");
+        assert (s3 == entries);
+    }
+}

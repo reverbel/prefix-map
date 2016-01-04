@@ -30,17 +30,31 @@ void measureSearchTime(Map<{Character*}, Integer> map,
 
 "Run the module `prefixmap.perf.eval`."
 shared void run() {
-    //value inputFilePath = parsePath("/home/reverbel/american-english.shuffled");
-    value inputFilePath = parsePath("/home/reverbel/find.output.txt");
+    value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.shuffled");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.shuffled.head-10000");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.ordered");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.reverse-ordered");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/find.output");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/find.output.shuffled");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/find.output.ordered");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/find.output.reverse-ordered");
+    //value inputFilePath = parsePath("/home/reverbel/datafiles/find.output.shuffled.head-10000");
     if (is File inputFile = inputFilePath.resource) {
         try (reader = inputFile.Reader()) {
             value keysToSearch = ArrayList<String>();
             value seqsToSearch = ArrayList<[Character+]>();
             variable Integer count = 0;
             variable Integer t = 0;
+            variable Integer accumulatedLength = 0;
             while (exists word = reader.readLine()) {
                 keysToSearch.add(word);
+                accumulatedLength += word.size;
             }
+            print("                  key count: ``keysToSearch.size``");
+            value averageKeyLength =
+                    accumulatedLength.float / keysToSearch.size;
+            print("         average key length: ``averageKeyLength``\n");
+            
             variable Integer n = 10;
             while (n > 0) {
                 seqsToSearch.clear();
@@ -54,7 +68,7 @@ shared void run() {
                 }
                 n--;
             }
-            process.write("toSequence: ");
+            process.write("                 toSequence: ");
             print("``t.float / (1000 * count)`` milliseconds");
         }
         try (reader = inputFile.Reader()) {
@@ -74,7 +88,7 @@ shared void run() {
                 map.put(word, word.size);
                 keysToSearch.add(word);
             }
-            process.write("get on TernarySplayTreeMap: ");
+            process.write(" get on TernarySplayTreeMap: ");
             measureSearchTime(map, keysToSearch, 10);
         }
         try (reader = inputFile.Reader()) {
@@ -84,7 +98,7 @@ shared void run() {
                 map.put(word, word.size);
                 keysToSearch.add(word);
             }
-            process.write("get on TreeMap: ");
+            process.write("             get on TreeMap: ");
             measureSearchTime(map, keysToSearch, 10);
         }
         try (reader = inputFile.Reader()) {
@@ -94,7 +108,7 @@ shared void run() {
                 map.put(word, word.size);
                 keysToSearch.add(word);
             }
-            process.write("get on HashMap: ");
+            process.write("             get on HashMap: ");
             measureSearchTime(map, keysToSearch, 10);
         }
     }
