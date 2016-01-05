@@ -75,7 +75,8 @@ shared test void testMultipleEntryTernarySearchTreeMap() {
     variable String s;
     variable Integer? n;
     
-    value strings = {"at", "as", "bat", "bats", "bog", "boy", "caste", "cats", "day", "dog", "donut", "door"};
+    value strings = {"at", "as", "bat", "bats", "bog", "boy", 
+                     "caste", "cats", "day", "dog", "donut", "door"};
     for (str in strings) {
         n = map.put(str, str.size);
         assert (n is Null);
@@ -122,7 +123,8 @@ shared test void testMultipleEntryTernarySearchTreeMap() {
     value m = TernarySearchTreeMap {
         toKey = toString;
         entries = { for (str in strings) str -> str.size };
-        Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
+        Comparison compare(Character c1, Character c2) 
+                => c1.lowercased.compare(c2.lowercased);
     };
     
     s = "BoG";
@@ -145,14 +147,19 @@ shared test void testMultipleEntryTernarySearchTreeMap() {
     assertEquals(x15.first, "X"-> 15);
     assertEquals(x15.last, "X"-> 15);
     
-    value aaa = TernarySearchTreeMap(toString, { "a"-> 1, "ab"-> 2, "abc"-> 3});
+    value aaa = TernarySearchTreeMap(toString, 
+                                     { "a"-> 1, "ab"-> 2, "abc"-> 3});
     assertEquals(aaa.first, "a"-> 1);
     assertEquals(aaa.last, "abc"-> 3);
 
-    assertEquals(m.higherEntries("bat").sequence(), m.higherEntries("bab").sequence());
-    assertEquals(m.higherEntries("bates").sequence(), m.higherEntries("bats").sequence());
-    assertEquals(m.higherEntries("dont").sequence(), m.higherEntries("DONUT").sequence());
-    assertEquals(m.lowerEntries("dont").sequence(), m.lowerEntries("DoG").sequence());
+    assertEquals(m.higherEntries("bat").sequence(), 
+                 m.higherEntries("bab").sequence());
+    assertEquals(m.higherEntries("bates").sequence(), 
+                 m.higherEntries("bats").sequence());
+    assertEquals(m.higherEntries("dont").sequence(), 
+                 m.higherEntries("DONUT").sequence());
+    assertEquals(m.lowerEntries("dont").sequence(),
+                 m.lowerEntries("DoG").sequence());
     assertEquals(m.higherEntries("as").sequence(), m.sequence());
     assertEquals(m.lowerEntries("z").sequence(), m.sequence().reversed);
 
@@ -161,7 +168,8 @@ shared test void testMultipleEntryTernarySearchTreeMap() {
 shared test void testReverseIteratorOnTernarySearchTreeMap() {
     value map = TernarySearchTreeMap<Character, String, Integer>(toString);
     
-    value strings = ["as", "at", "bat", "bats", "bog", "boy", "caste", "cats", "day", "dog", "donut", "door"];
+    value strings = ["as", "at", "bat", "bats", "bog", "boy", 
+                     "caste", "cats", "day", "dog", "donut", "door"];
     for (str in strings) {
         map.put(str, str.size);
     }
@@ -175,7 +183,8 @@ shared test void testReverseIteratorOnTernarySearchTreeMap() {
 }
 
 shared test void testTernarySearchTreeMapWithFullDictionary() {
-    value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.shuffled");
+    value inputFilePath = parsePath(
+            "/home/reverbel/datafiles/american-english.shuffled");
     if (is File inputFile = inputFilePath.resource) {
         value outputFilePath = home.childPath("american-english.iterated");
         value toDelete = outputFilePath.resource;
@@ -186,7 +195,8 @@ shared test void testTernarySearchTreeMapWithFullDictionary() {
         assert (is Nil loc);
         value outputFile = loc.createFile();
         
-        value outputFilePath2 = home.childPath("american-english.reverse-iterated");
+        value outputFilePath2 = home.childPath(
+                "american-english.reverse-iterated");
         value toDelete2 = outputFilePath2.resource;
         if (is ExistingResource toDelete2) {
             toDelete2.delete();
@@ -196,9 +206,11 @@ shared test void testTernarySearchTreeMapWithFullDictionary() {
         value outputFile2 = loc2.createFile();
 
         
-        try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
-                                          writer2 = outputFile2.Overwriter()) {
-            value map = TernarySearchTreeMap<Character, String, Integer>(toString);
+        try (reader = inputFile.Reader(), 
+             writer = outputFile.Overwriter(),
+             writer2 = outputFile2.Overwriter()) {
+            value map = 
+                TernarySearchTreeMap<Character, String, Integer>(toString);
             while (exists word = reader.readLine()) { 
                 map.put(word, word.size);
             }
@@ -215,7 +227,8 @@ shared test void testTernarySearchTreeMapWithFullDictionary() {
         
         Process process1 = createProcess { 
             command = "cmp";
-            arguments = ["american-english.iterated", "/home/reverbel/datafiles/american-english.ordered"];
+            arguments = ["american-english.iterated", 
+                         "/home/reverbel/datafiles/american-english.ordered"];
             path = home;
             output = currentOutput;
             error = currentError;
@@ -224,7 +237,8 @@ shared test void testTernarySearchTreeMapWithFullDictionary() {
         
         Process process2 = createProcess { 
             command = "cmp";
-            arguments = ["american-english.reverse-iterated", "/home/reverbel/datafiles/american-english.reverse-ordered"];
+            arguments = ["american-english.reverse-iterated",
+                         "/home/reverbel/datafiles/american-english.reverse-ordered"];
             path = home;
             output = currentOutput;
             error = currentError;
@@ -284,7 +298,8 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     variable String s;
     variable Integer? n;
     
-    value strings = {"at", "as", "bat", "bats", "bog", "boy", "caste", "cats", "day", "dog", "donut", "door"};
+    value strings = {"at", "as", "bat", "bats", "bog", "boy", 
+                     "caste", "cats", "day", "dog", "donut", "door"};
     for (str in strings) {
         n = map.put(str, str.size);
         assert (n is Null);
@@ -331,7 +346,8 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     value m = TernarySplayTreeMap {
         toKey = toString;
         entries = { for (str in strings) str -> str.size };
-        Comparison compare(Character c1, Character c2) => c1.lowercased.compare(c2.lowercased);
+        Comparison compare(Character c1, Character c2) 
+                => c1.lowercased.compare(c2.lowercased);
     };
     
     s = "BoG";
@@ -354,14 +370,19 @@ shared test void testMultipleEntryTernarySplayTreeMap() {
     assertEquals(x15.first, "X"-> 15);
     assertEquals(x15.last, "X"-> 15);
     
-    value aaa = TernarySplayTreeMap(toString, { "a"-> 1, "ab"-> 2, "abc"-> 3});
+    value aaa = TernarySplayTreeMap(toString,
+                                    { "a"-> 1, "ab"-> 2, "abc"-> 3});
     assertEquals(aaa.first, "a"-> 1);
     assertEquals(aaa.last, "abc"-> 3);
     
-    assertEquals(m.higherEntries("bat").sequence(), m.higherEntries("bab").sequence());
-    assertEquals(m.higherEntries("bates").sequence(), m.higherEntries("bats").sequence());
-    assertEquals(m.higherEntries("dont").sequence(), m.higherEntries("DONUT").sequence());
-    assertEquals(m.lowerEntries("dont").sequence(), m.lowerEntries("DoG").sequence());
+    assertEquals(m.higherEntries("bat").sequence(), 
+                 m.higherEntries("bab").sequence());
+    assertEquals(m.higherEntries("bates").sequence(), 
+                 m.higherEntries("bats").sequence());
+    assertEquals(m.higherEntries("dont").sequence(),
+                 m.higherEntries("DONUT").sequence());
+    assertEquals(m.lowerEntries("dont").sequence(),
+                 m.lowerEntries("DoG").sequence());
     assertEquals(m.higherEntries("as").sequence(), m.sequence());
     assertEquals(m.lowerEntries("z").sequence(), m.sequence().reversed);
     
@@ -371,7 +392,8 @@ shared test void testReverseIteratorOnTernarySplayTreeMap() {
     //value map = TernarySearchTreeMap<Character, String, Integer>(toString);
     value map = TernarySplayTreeMap<Character, String, Integer>(toString);
     
-    value strings = ["as", "at", "bat", "bats", "bog", "boy", "caste", "cats", "day", "dog", "donut", "door"];
+    value strings = ["as", "at", "bat", "bats", "bog", "boy",
+                     "caste", "cats", "day", "dog", "donut", "door"];
     for (str in strings) {
         map.put(str, str.size);
     }
@@ -385,9 +407,11 @@ shared test void testReverseIteratorOnTernarySplayTreeMap() {
 }
 
 shared test void testTernarySplayTreeMapWithFullDictionary() {
-    value inputFilePath = parsePath("/home/reverbel/datafiles/american-english.shuffled");
+    value inputFilePath = parsePath(
+            "/home/reverbel/datafiles/american-english.shuffled");
     if (is File inputFile = inputFilePath.resource) {
-        value outputFilePath = home.childPath("american-english.splay-tree-iterated");
+        value outputFilePath = home.childPath(
+                "american-english.splay-tree-iterated");
         value toDelete = outputFilePath.resource;
         if (is ExistingResource toDelete) {
             toDelete.delete();
@@ -396,7 +420,8 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
         assert (is Nil loc);
         value outputFile = loc.createFile();
         
-        value outputFilePath2 = home.childPath("american-english.splay-tree-reverse-iterated");
+        value outputFilePath2 = home.childPath(
+                "american-english.splay-tree-reverse-iterated");
         value toDelete2 = outputFilePath2.resource;
         if (is ExistingResource toDelete2) {
             toDelete2.delete();
@@ -408,7 +433,8 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
         
         try (reader = inputFile.Reader(), writer = outputFile.Overwriter(),
             writer2 = outputFile2.Overwriter()) {
-            value map = TernarySplayTreeMap<Character, String, Integer>(toString);
+            value map = 
+                TernarySplayTreeMap<Character, String, Integer>(toString);
             while (exists word = reader.readLine()) {
                 map.put(word, word.size);
             }
@@ -425,7 +451,8 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
         
         Process process1 = createProcess { 
             command = "cmp";
-            arguments = ["american-english.splay-tree-iterated", "/home/reverbel/datafiles/american-english.ordered"];
+            arguments = ["american-english.splay-tree-iterated",
+                         "/home/reverbel/datafiles/american-english.ordered"];
             path = home;
             output = currentOutput;
             error = currentError;
@@ -434,7 +461,9 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
         
         Process process2 = createProcess { 
             command = "cmp";
-            arguments = ["american-english.splay-tree-reverse-iterated", "/home/reverbel/datafiles/american-english.reverse-ordered"];
+            arguments = 
+                [ "american-english.splay-tree-reverse-iterated",
+                  "/home/reverbel/datafiles/american-english.reverse-ordered"];
             path = home;
             output = currentOutput;
             error = currentError;
@@ -449,11 +478,13 @@ shared test void testTernarySplayTreeMapWithFullDictionary() {
 shared test void testBugFixOnTernarySplayTreeMap() {
     value map = TernarySplayTreeMap<Character, String, Integer>(toString);
     
-    value someStrings = {"regret", "ultra's", "insinuating", "Charlotte's", "stakeouts"};
+    value someStrings = 
+            {"regret", "ultra's", "insinuating", "Charlotte's", "stakeouts"};
     for (str in someStrings) {
         map.put(str, str.size);
     }
-    assertEquals(map.string, "{ Charlotte's->11, insinuating->11, regret->6, stakeouts->9, ultra's->7 }");
+    assertEquals(map.string, 
+                 "{ Charlotte's->11, insinuating->11, regret->6, stakeouts->9, ultra's->7 }");
     map.clear();
     value moreStrings = {"escapade", "es"};
     for (str in moreStrings) {
